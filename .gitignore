@@ -1,0 +1,10 @@
+.idea/
+*.iml
+target/
+
+
+*.log
+*.env
+
+
+mysql-connector-java-*.jar
