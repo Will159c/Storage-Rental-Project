@@ -46,11 +46,11 @@ public class mySQL {
         String sql = "SELECT * FROM storage";
         List<Integer> ids = new ArrayList<>();
 
-        try(Connection conn = mySQL.getConnection();
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            ResultSet rs = stmt.executeQuery()) {
+        try (Connection conn = mySQL.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
 
-            while(rs.next()) {
+            while (rs.next()) {
                 ids.add(rs.getInt("id"));
             }
 
@@ -59,6 +59,49 @@ public class mySQL {
         }
         return ids;
     }
+
+
+    public static boolean reserveStorageUnit(int storageID, String customerName) { // reserves
+        String checkAvailability = "SELECT * FROM storage_reservations WHERE storage_id = ?";
+        String reserveUnit = "INSERT INTO storage_reservations (storage_id, customer_name) VALUES (?, ?)";
+
+        try (Connection conn = getConnection();
+             PreparedStatement checkStmt = conn.prepareStatement(checkAvailability);
+             PreparedStatement reserveStmt = conn.prepareStatement(reserveUnit)) {
+
+            checkStmt.setInt(1, storageID);
+            ResultSet rs = checkStmt.executeQuery();
+
+            if (rs.next()) {
+                return false;  // Reservation failed (already taken)
+            } else {
+                reserveStmt.setInt(1, storageID);
+                reserveStmt.setString(2, customerName);
+                reserveStmt.executeUpdate();
+                return true;  // Reservation successful
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error reserving storage unit: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public static boolean cancelReservation(int storageID, String customerName) { // cancels
+        String deleteReservation = "DELETE FROM storage_reservations WHERE storage_id = ? AND customer_name = ?";
+
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(deleteReservation)) {
+
+            stmt.setInt(1, storageID);
+            stmt.setString(2, customerName);
+            int rowsAffected = stmt.executeUpdate();
+
+            return rowsAffected > 0;  // Returns true if a reservation was canceled
+
+        } catch (SQLException e) {
+            System.err.println("Error cancelling reservation: " + e.getMessage());
+            return false;
+        }
+    }
 }
-
-
