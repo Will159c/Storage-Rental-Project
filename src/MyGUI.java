@@ -36,6 +36,7 @@ public class MyGUI {
 
         cardpanel.add(welcomeScreen(), "Welcome Screen");
         cardpanel.add(registerScreen(), "Registration");
+        cardpanel.add(loginScreen(), "Login");
 
         frame.add(cardpanel);
         cardLayout.show(cardpanel, "Welcome Screen"); // Show the first page
@@ -68,7 +69,7 @@ public class MyGUI {
         gbc.insets = new Insets(20, 0, 10, 0); // Add spacing in between buttons and labels
         panel.add(registerButton, gbc);
 
-        // Button action
+        // Register Button action
         registerButton.addActionListener(e -> cardLayout.show(cardpanel, "Registration"));
 
         // Login Button
@@ -77,6 +78,10 @@ public class MyGUI {
         gbc.gridy = 2; // Move button to next row
         gbc.insets = new Insets(20, 0, 10, 0); // Add spacing in between buttons and labels
         panel.add(loginButton, gbc);
+
+        // Login button action
+        loginButton.addActionListener(e -> cardLayout.show(cardpanel, "Login"));
+
 
         return panel;
     }
@@ -238,6 +243,113 @@ public class MyGUI {
                 System.out.println("I have to go to work now lololol");
             }
         });
+
+        return panel;
+    }
+
+    private JPanel loginScreen() {
+        ///////////// Initial Settings ///////////
+        JPanel panel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints(); // Allows for ordered positioning
+
+        // Register Text
+        titleTxt = new JLabel("Log-in", SwingConstants.CENTER);
+        titleTxt.setFont(new Font("SansSerif", Font.BOLD, 40));
+        titleTxt.setMinimumSize(new Dimension(400, 400));
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2; // Both this line and the line below ensures title is centered
+        gbc.anchor = GridBagConstraints.CENTER;
+        panel.add(titleTxt, gbc);
+
+        // Reset constraints for next components
+        gbc.gridwidth = 1;
+
+        ////// Username Items //////
+        // Username text
+        userNameTxt = new JLabel("Enter Username");
+        userNameTxt.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        gbc.gridy = 1;
+        gbc.insets = new Insets(20, 15, 5, 0); // Add spacing
+        gbc.anchor = GridBagConstraints.EAST; // Keep this to the left
+        panel.add(userNameTxt, gbc);
+
+        // Username text field
+        registerUserTxt = new JTextField(15);
+        gbc.gridy = 1;
+        gbc.gridx = 1;
+        gbc.anchor = GridBagConstraints.WEST; // Keep this to the right
+        panel.add(registerUserTxt, gbc);
+
+        // Confirm username is valid
+        userValid = new JLabel("Invalid username");
+        userValid.setFont(new Font("SansSerif", Font.ITALIC, 10));
+        userValid.setForeground(Color.red);
+        gbc.gridy = 2;
+        gbc.gridx = 1;
+        gbc.insets = new Insets(0, 40, 5, 0);
+        gbc.anchor = GridBagConstraints.WEST;
+        panel.add(userValid, gbc);
+
+        ////////// Password Items //////////
+        // Password text
+        passLabel = new JLabel("Enter password");
+        passLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        gbc.gridy = 3;
+        gbc.gridx = 0;
+        gbc.insets = new Insets(20, 15, 5, 0); // Add spacing
+        gbc.anchor = GridBagConstraints.EAST; // Keep this to the left
+        panel.add(passLabel, gbc);
+
+        // Password text field
+        passTxt = new JTextField(15);
+        gbc.gridy = 3;
+        gbc.gridx = 1;
+        gbc.anchor = GridBagConstraints.WEST; // Keep this to the right
+        panel.add(passTxt, gbc);
+
+        // Confirm password is valid
+        passValid = new JLabel("Invalid Password");
+        passValid.setFont(new Font("SansSerif", Font.ITALIC, 10));
+        passValid.setForeground(Color.red);
+        gbc.gridy = 4;
+        gbc.gridx = 1;
+        gbc.insets = new Insets(0, 40, 5, 0);
+        gbc.anchor = GridBagConstraints.WEST;
+        panel.add(passValid, gbc);
+
+        //////// Buttons /////////
+
+        /// Back button
+        // Back button Design
+        rBack = new JButton("Back");
+        rBack.setPreferredSize(new Dimension(120, 30));
+        gbc.gridy = 5;
+        gbc.gridx = 0;
+        gbc.insets = new Insets(20, 0, 10, 0); // Add spacing in between buttons
+        panel.add(rBack, gbc);
+
+        // Back Button Function
+        rBack.addActionListener(e -> cardLayout.show(cardpanel, "Welcome Screen"));
+
+        /// Confirmation Button
+
+        // Confirm Button design
+        rConfirm = new JButton("Confirm");
+        rConfirm.setPreferredSize(new Dimension(120, 30));
+        gbc.gridy = 5;
+        gbc.gridx = 1;
+        gbc.insets = new Insets(20, 80, 10, 0); // Add spacing in between buttons
+        panel.add(rConfirm, gbc);
+
+        // Confirm button functionality
+        rConfirm.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("I have to go to work now lololol");
+            }
+        });
+
 
         return panel;
     }
