@@ -5,7 +5,7 @@ import java.util.List;
 public class mySQL {
     private static final String URL = "jdbc:mysql://caboose.proxy.rlwy.net:54157/railway";
     private static final String USER = "root";
-    private static final String PASSWORD = "REPLACE HERE"; // Replace with actual password
+    private static final String PASSWORD = "PUT PASSWORD HERE"; // Replace with actual password
 
     private static Connection getConnection() throws SQLException {  //this gets the connection to the database
 
@@ -104,4 +104,19 @@ public class mySQL {
             return false;
         }
     }
+    public static boolean isUnitReserved(int storageID) {
+        String query = "SELECT * FROM storage_reservations WHERE storage_id = ? LIMIT 1";
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setInt(1, storageID);
+            ResultSet rs = stmt.executeQuery();
+            return rs.next(); // If we get at least one row, it's reserved
+
+        } catch (SQLException e) {
+            System.err.println("Error checking reservation status: " + e.getMessage());
+            return false;  // Fallback to 'not reserved' if there's an error
+        }
+    }
+
 }
