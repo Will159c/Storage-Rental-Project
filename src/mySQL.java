@@ -5,12 +5,54 @@ import java.util.List;
 public class mySQL {
     private static final String URL = "jdbc:mysql://caboose.proxy.rlwy.net:54157/railway";
     private static final String USER = "root";
-    private static final String PASSWORD = "PUT PASSWORD HERE"; // Replace with actual password
+    private static final String PASSWORD = "Replace Here"; // Replace with actual password
 
     private static Connection getConnection() throws SQLException {  //this gets the connection to the database
 
         return DriverManager.getConnection(URL, USER, PASSWORD);
 
+    }
+
+    public static boolean isUser(String username) { //returns true if the given string username already exists
+        String checkIfUsernameExists = "SELECT EXISTS (SELECT 1 FROM users WHERE username = ?)";
+
+        try(Connection conn = mySQL.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(checkIfUsernameExists)) {
+
+            stmt.setString(1, username);
+
+            try(ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getBoolean(1);
+                } else {
+                    return false;
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public static boolean isUsernameAndPassword(String username, String password) {
+        String checkIfUserCorrect = "SELECT EXISTS (SELECT 1 FROM users WHERE username = ? AND password = ?)";
+
+        try(Connection conn = mySQL.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(checkIfUserCorrect)) {
+
+            stmt.setString(1, username);
+            stmt.setString(2, password);
+
+            try(ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getBoolean(1);
+                } else {
+                    return false;
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static void insertUser(String username, String password) { //this inserts a new user into database
@@ -104,6 +146,7 @@ public class mySQL {
             return false;
         }
     }
+
     public static boolean isUnitReserved(int storageID) {
         String query = "SELECT * FROM storage_reservations WHERE storage_id = ? LIMIT 1";
         try (Connection conn = getConnection();

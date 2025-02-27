@@ -23,7 +23,7 @@ public class CustomerReserveOrRemove {
         }
     }
 
-    public static void main(String[] args) {
+    public static void guiTestCustomerReserveOrRemove() {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Java Program Running Successfully!");
         try {

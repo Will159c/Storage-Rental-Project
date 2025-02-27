@@ -3,7 +3,7 @@ import java.util.Scanner;
 
 public class BrowseStorageUnits {
 
-    public static void main(String[] args) {
+    public static void guiTestBrowseStorageUnits() {
         Scanner scanner = new Scanner(System.in);
 
         System.out.println("===== Browse Storage Units =====");
