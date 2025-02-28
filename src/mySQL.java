@@ -148,7 +148,7 @@ public class mySQL {
     }
 
     public static boolean isUnitReserved(int storageID) {
-        String query = "SELECT * FROM storage_reservations WHERE storage_id = ? LIMIT 1";
+        String query = "SELECT EXISTS (SELECT 1 FROM storage WHERE id = ? AND storage_reservations = 1) AS is_available;";
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
