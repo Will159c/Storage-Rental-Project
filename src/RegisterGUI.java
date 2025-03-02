@@ -100,7 +100,7 @@ public class RegisterGUI extends JPanel {
         panel.add(passTxt, gbc);
 
         // Confirm password is valid
-        JLabel passValid = new JLabel("Password must be at least 4 characters");
+        JLabel passValid = new JLabel("");
         passValid.setFont(new Font("SansSerif", Font.ITALIC, 10));
         passValid.setForeground(Color.red);
         gbc.gridy = 6;
@@ -165,10 +165,40 @@ public class RegisterGUI extends JPanel {
         rConfirm.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("Hot dog water");
+                System.out.println(registerUserTxt.getText());
+                System.out.println(emailTxt.getText());
+                System.out.println(passTxt.getText());
+                System.out.println(cpassTxt.getText());
+
+                validate(registerUserTxt.getText(), emailTxt.getText(), passTxt.getText(), cpassTxt.getText());
+
+                if (passTxt.getText().length() > 4) {
+                    passValid.setText("Password must be at least 4 characters");
+                }
             }
         });
 
         add(panel);
+    }
+
+    public static boolean validate(String userTxt, String emailTxt, String password, String cPassword) {
+        mySQL sql = new mySQL();
+
+        if (sql.isUser(userTxt)) {
+            System.out.println("User is not in database");
+        }
+
+        if (password.length() < 4) {
+            return false;
+        }
+        else if (!password.contains(cPassword)) {
+            return false;
+        }
+        else if (sql.isUser(userTxt)) {
+            System.out.println("User is not in database");
+            return true;
+        }
+
+        return true;
     }
 }
