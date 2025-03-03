@@ -174,9 +174,8 @@ public class RegisterGUI extends JPanel {
                 userValid.setText("");
                 passValid.setText("");
                 cpassValid.setText("");
+                emailValid.setText("");
                 //emailValid.setText("Email already in use");
-
-                //System.out.println(getUser);
 
                 // Check registration validity
                 if (validate(getUser, getEmail, getPass, getCPass)) {
@@ -205,6 +204,12 @@ public class RegisterGUI extends JPanel {
                     if (!getPass.contains(getCPass)) {
                         cpassValid.setText("Passwords don't match");
                     }
+                    if (!getEmail.contains("@")) {
+                        emailValid.setText("Invalid format");
+                    }
+                    if (mySQL.isEmail(getEmail)) {
+                        emailValid.setText("Email already in use");
+                    }
                 }
             }
         });
@@ -221,6 +226,12 @@ public class RegisterGUI extends JPanel {
             return false;
         }
         else if (!password.contains(cPassword)) {
+            return false;
+        }
+        else if (!emailTxt.contains("@")) {
+            return false;
+        }
+        else if (mySQL.isEmail(emailTxt)) {
             return false;
         }
 
