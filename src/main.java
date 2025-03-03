@@ -9,9 +9,13 @@ public class main {
 //            System.out.println("yay");                                    //returns yay if the isUsernameAndPassword method returns true
 //        }
 //
-//        List<Integer> hello = mySQL.getStorageID();                       // creates the dynamic array list named hello as this will be changed
+//        List<Object> hello = mySQL.getStorageID();                       // creates the dynamic array list named hello as this will be changed
 //
-//        for (Integer i : hello) { System.out.println(i); }                // prints out all the elements in the array hello
+//        for (Object i : hello) { System.out.println(i); }                // prints out all the elements in the array hello
+//        MyGUI myGUI = new MyGUI();
+//        mySQL.setEmail("test3", "email.gmail.com");
+        List<Object> hello = mySQL.getStorageInformation(11223124);
+        for (Object i : hello) { System.out.println(i); }
 
 
     }

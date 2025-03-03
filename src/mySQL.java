@@ -16,12 +16,12 @@ public class mySQL {
     public static boolean isUser(String username) { //returns true if the given string username already exists
         String checkIfUsernameExists = "SELECT EXISTS (SELECT 1 FROM users WHERE username = ?)";
 
-        try(Connection conn = mySQL.getConnection();
-            PreparedStatement stmt = conn.prepareStatement(checkIfUsernameExists)) {
+        try (Connection conn = mySQL.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(checkIfUsernameExists)) {
 
             stmt.setString(1, username);
 
-            try(ResultSet rs = stmt.executeQuery()) {
+            try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     return rs.getBoolean(1);
                 } else {
@@ -37,13 +37,13 @@ public class mySQL {
     public static boolean isUsernameAndPassword(String username, String password) {
         String checkIfUserCorrect = "SELECT EXISTS (SELECT 1 FROM users WHERE username = ? AND password = ?)";
 
-        try(Connection conn = mySQL.getConnection();
-            PreparedStatement stmt = conn.prepareStatement(checkIfUserCorrect)) {
+        try (Connection conn = mySQL.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(checkIfUserCorrect)) {
 
             stmt.setString(1, username);
             stmt.setString(2, password);
 
-            try(ResultSet rs = stmt.executeQuery()) {
+            try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     return rs.getBoolean(1);
                 } else {
@@ -66,6 +66,45 @@ public class mySQL {
             stmt.executeUpdate();
             System.out.println("User " + username + " added!");
 
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void setEmail(String username, String email) { //checks if the given email already is connected, if not it connects the email to the given user overriding information aswell
+        String sql = "UPDATE users SET email = ? WHERE username = ?";
+        if(isEmail(email)) {
+            System.out.println("Error, email already exists.");
+            return;
+        }
+
+        try (Connection conn = mySQL.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, email);
+            stmt.setString(2, username);
+            stmt.executeUpdate();
+
+        } catch (SQLException e){
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public static boolean isEmail(String email) { //returns true if a string email is already connected to another account
+        String checkIfEmailExists = "SELECT EXISTS (SELECT 1 FROM users WHERE email = ?)";
+
+        try (Connection conn = mySQL.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(checkIfEmailExists)) {
+
+            stmt.setString(1, email);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getBoolean(1);
+                } else {
+                    return false;
+                }
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -100,6 +139,48 @@ public class mySQL {
             throw new RuntimeException(e);
         }
         return ids;
+    }
+
+    public static List<Object> getStorageInformation(int id) { // gets all the information of a given id and puts it into a Object list
+        String sql = "SELECT * FROM storage WHERE id = ?";
+        List<Object> unit = new ArrayList<>();
+
+        try (Connection conn = mySQL.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                unit.add(rs.getInt("id"));
+                unit.add(rs.getString("size"));
+                unit.add(rs.getInt("price"));
+                unit.add(rs.getString("location"));
+            } else {
+                System.out.println("No storage unit found for ID: " + id);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+
+        return unit;
+    }
+
+    public static void createNewStorageUnit(String size, int price, String location) { //creates a new storageUnit
+        String sql = "INSERT INTO storage (size, price, location) VALUES (?, ?, ?)";
+
+        try (Connection conn = mySQL.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, size);
+            stmt.setInt(2, price);
+            stmt.setString(3, location);
+            stmt.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 
