@@ -42,7 +42,7 @@ public class LoginScreenGUI extends JPanel {
         panel.add(registerUserTxt, gbc);
 
         // Username validation message
-        JLabel userValid = new JLabel("Invalid username");
+        JLabel userValid = new JLabel("");
         userValid.setFont(new Font("SansSerif", Font.ITALIC, 10));
         userValid.setForeground(Color.red);
         gbc.gridy = 2;
@@ -60,24 +60,16 @@ public class LoginScreenGUI extends JPanel {
         panel.add(passLabel, gbc);
 
         // Password text field
-        JTextField passTxt = new JTextField(15);
+        JPasswordField passTxt = new JPasswordField(15);
         gbc.gridx = 1;
         gbc.anchor = GridBagConstraints.WEST;
         panel.add(passTxt, gbc);
 
-        // Password validation message
-        JLabel passValid = new JLabel("Invalid Password");
-        passValid.setFont(new Font("SansSerif", Font.ITALIC, 10));
-        passValid.setForeground(Color.red);
-        gbc.gridy = 4;
-        gbc.gridx = 1;
-        gbc.insets = new Insets(0, 40, 5, 0);
-        panel.add(passValid, gbc);
 
         // Back Button
         JButton rBack = new JButton("Back");
         rBack.setPreferredSize(new Dimension(120, 30));
-        gbc.gridy = 5;
+        gbc.gridy = 4;
         gbc.gridx = 0;
         gbc.insets = new Insets(20, 0, 10, 0);
         panel.add(rBack, gbc);
@@ -93,7 +85,28 @@ public class LoginScreenGUI extends JPanel {
         panel.add(rConfirm, gbc);
 
         // Confirm button function
-        rConfirm.addActionListener(e -> myGui.showMain("Storage Screen"));
+        rConfirm.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String getUser = registerUserTxt.getText();
+                String getPass = String.valueOf(passTxt.getPassword());
+
+                // Clear error messages
+                userValid.setText("");
+
+                if (mySQL.isUsernameAndPassword(getUser, getPass)) {
+
+                    // Clear text fields
+                    registerUserTxt.setText("");
+                    passTxt.setText("");
+
+                    myGui.showMain("Storage Screen"); // Redirect to Storage Screen
+                }
+                else {
+                    userValid.setText("Invalid Credentials");
+                }
+            }
+        });
 
         // Add panel to LoginScreenGUI
         add(panel);
