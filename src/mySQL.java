@@ -184,9 +184,15 @@ public class mySQL {
     }
 
 
-    public static boolean reserveStorageUnit(int storageID, String customerName) { // reserves
+    public static boolean reserveStorageUnit(int storageID, String email, String password) {
+        // Verify user exists and credentials are correct
+        if (!isEmailAndPasswordValid(email, password)) {
+            System.out.println("Invalid email or password.");
+            return false;
+        }
+
         String checkAvailability = "SELECT * FROM storage_reservations WHERE storage_id = ?";
-        String reserveUnit = "INSERT INTO storage_reservations (storage_id, customer_name) VALUES (?, ?)";
+        String reserveUnit = "INSERT INTO storage_reservations (storage_id, customer_email) VALUES (?, ?)";
 
         try (Connection conn = getConnection();
              PreparedStatement checkStmt = conn.prepareStatement(checkAvailability);
@@ -196,12 +202,12 @@ public class mySQL {
             ResultSet rs = checkStmt.executeQuery();
 
             if (rs.next()) {
-                return false;  // Reservation failed (already taken)
+                return false;  // Already reserved
             } else {
                 reserveStmt.setInt(1, storageID);
-                reserveStmt.setString(2, customerName);
+                reserveStmt.setString(2, email);
                 reserveStmt.executeUpdate();
-                return true;  // Reservation successful
+                return true;
             }
 
         } catch (SQLException e) {
@@ -210,17 +216,24 @@ public class mySQL {
         }
     }
 
-    public static boolean cancelReservation(int storageID, String customerName) { // cancels
-        String deleteReservation = "DELETE FROM storage_reservations WHERE storage_id = ? AND customer_name = ?";
+
+    public static boolean cancelReservation(int storageID, String email, String password) {
+        // Verify user exists and credentials are correct
+        if (!isEmailAndPasswordValid(email, password)) {
+            System.out.println("Invalid email or password.");
+            return false;
+        }
+
+        String deleteReservation = "DELETE FROM storage_reservations WHERE storage_id = ? AND customer_email = ?";
 
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(deleteReservation)) {
 
             stmt.setInt(1, storageID);
-            stmt.setString(2, customerName);
+            stmt.setString(2, email);
             int rowsAffected = stmt.executeUpdate();
 
-            return rowsAffected > 0;  // Returns true if a reservation was canceled
+            return rowsAffected > 0;  // True if reservation was canceled
 
         } catch (SQLException e) {
             System.err.println("Error cancelling reservation: " + e.getMessage());
@@ -228,18 +241,66 @@ public class mySQL {
         }
     }
 
+
     public static boolean isUnitReserved(int storageID) {
-        String query = "SELECT EXISTS (SELECT 1 FROM storage WHERE id = ? AND storage_reservations = 1) AS is_available;";
+        String query = "SELECT EXISTS (SELECT 1 FROM storage_reservations WHERE storage_id = ?)";
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, storageID);
+            ResultSet rs = stmt.executeQuery();
+            return rs.next() && rs.getBoolean(1);  // Ensure it returns true only if reserved
+        } catch (SQLException e) {
+            System.err.println("Error checking reservation status: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public static void createReservationsTable() {
+        String createTableSQL = "CREATE TABLE IF NOT EXISTS storage_reservations (" +
+                "storage_id INT PRIMARY KEY, " +
+                "customer_email VARCHAR(255) NOT NULL, " +
+                "customer_name VARCHAR(255) NULL" +
+                ")";
+
+        String checkColumnSQL = "SHOW COLUMNS FROM storage_reservations LIKE 'customer_name'";
+        String modifyColumnSQL = "ALTER TABLE storage_reservations MODIFY COLUMN customer_name VARCHAR(255) NULL";
+
+        try (Connection conn = getConnection();
+             Statement stmt = conn.createStatement()) {
+
+            // Create the table if it doesn't exist
+            stmt.executeUpdate(createTableSQL);
+            System.out.println("Checked/Created table: storage_reservations");
+
+            // Check if the customer_name column exists and update it to allow NULL
+            try (ResultSet rs = stmt.executeQuery(checkColumnSQL)) {
+                if (rs.next()) { // If the column exists, make it nullable
+                    stmt.executeUpdate(modifyColumnSQL);
+                    System.out.println("Updated column: customer_name is now optional.");
+                }
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error creating/updating table: " + e.getMessage());
+        }
+    }
+
+
+    public static boolean isEmailAndPasswordValid(String email, String password) {
+        String query = "SELECT EXISTS (SELECT 1 FROM users WHERE email = ? AND password = ?)";
+
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
-            stmt.setInt(1, storageID);
+            stmt.setString(1, email);
+            stmt.setString(2, password);
             ResultSet rs = stmt.executeQuery();
-            return rs.next(); // If we get at least one row, it's reserved
+
+            return rs.next() && rs.getBoolean(1);
 
         } catch (SQLException e) {
-            System.err.println("Error checking reservation status: " + e.getMessage());
-            return false;  // Fallback to 'not reserved' if there's an error
+            System.err.println("Error verifying email and password: " + e.getMessage());
+            return false;
         }
     }
 

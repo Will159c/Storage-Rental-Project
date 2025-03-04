@@ -87,4 +87,11 @@ public class MyGUI {
     public void showMain(String panelName) {
         cardLayout.show(cardpanel, panelName);
     }
+
+    public void addPanel(JPanel panel, String name) {
+        cardpanel.add(panel, name);
+    }
+
 }
+
+

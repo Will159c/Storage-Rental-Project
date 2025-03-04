@@ -12,8 +12,12 @@ public class main {
 //        List<Object> hello = mySQL.getStorageID();                       // creates the dynamic array list named hello as this will be changed
 //
 //        for (Object i : hello) { System.out.println(i); }                // prints out all the elements in the array hello
-//        MyGUI myGUI = new MyGUI();
+        mySQL.createReservationsTable(); //reservation table is created
+        MyGUI myGUI = new MyGUI();
 //        mySQL.setEmail("test3", "email.gmail.com");
+
+       // mySQL.createNewStorageUnit("Large", 150, "Downtown"); // creates 1 storage uni
+
         List<Object> hello = mySQL.getStorageInformation(11223124);
         for (Object i : hello) { System.out.println(i); }
 
