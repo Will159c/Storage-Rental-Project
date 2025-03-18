@@ -53,6 +53,7 @@ public class AdminGUI extends JPanel {
         rBack.addActionListener(e -> myGui.showMain("Welcome Screen"));
 
         // Go to manage storage screen
+        storageButton.addActionListener(e -> myGui.showMain("Manage Storage Screen"));
 
         // Add panel to AdminGUI
         add(panel);
