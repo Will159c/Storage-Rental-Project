@@ -183,7 +183,6 @@ public class mySQL {
         }
     }
 
-
     public static boolean reserveStorageUnit(int storageID, String email, String password) {
         // Verify user exists and credentials are correct
         if (!isEmailAndPasswordValid(email, password)) {
@@ -206,8 +205,17 @@ public class mySQL {
             } else {
                 reserveStmt.setInt(1, storageID);
                 reserveStmt.setString(2, email);
-                reserveStmt.executeUpdate();
-                return true;
+                if (reserveStmt.executeUpdate() > 0) {
+                    // Send email notification
+                    EmailNotifier.sendEmail(email, "Storage Unit Reserved",
+                            "Your storage unit (ID: " + storageID + ") has been successfully reserved.");
+
+                    // Notify the admin
+                    EmailNotifier.sendEmail("storagerentalproject@gmail.com", "New Reservation",
+                            "A new storage unit (ID: " + storageID + ") has been reserved.");
+                    return true;
+                }
+                return false;
             }
 
         } catch (SQLException e) {
@@ -215,7 +223,6 @@ public class mySQL {
             return false;
         }
     }
-
 
     public static boolean cancelReservation(int storageID, String email, String password) {
         // Verify user exists and credentials are correct
@@ -233,13 +240,27 @@ public class mySQL {
             stmt.setString(2, email);
             int rowsAffected = stmt.executeUpdate();
 
-            return rowsAffected > 0;  // True if reservation was canceled
+            if (rowsAffected > 0) {
+                // Notify the user that their reservation was canceled
+                EmailNotifier.sendEmail(email, "Reservation Canceled",
+                        "Your reservation for storage unit (ID: " + storageID + ") has been canceled.");
+
+                // Notify the admin
+                EmailNotifier.sendEmail("storagerentalproject@gmail.com", "Reservation Canceled",
+                        "The reservation for storage unit (ID: " + storageID + ") has been canceled by " + email + ".");
+
+                return true;
+            } else {
+                System.out.println("No reservation found to cancel.");
+                return false;
+            }
 
         } catch (SQLException e) {
-            System.err.println("Error cancelling reservation: " + e.getMessage());
+            System.err.println("Error canceling reservation: " + e.getMessage());
             return false;
         }
     }
+
 
 
     public static boolean isUnitReserved(int storageID) {
