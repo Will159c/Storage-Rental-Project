@@ -19,14 +19,18 @@ public class MyGUI {
         cardLayout = new CardLayout();
         cardpanel = new JPanel(cardLayout);
 
+        // GUI pages
         LoginScreenGUI loginScreen = new LoginScreenGUI(this);
         StorageGUI storageScreen = new StorageGUI(this);
         RegisterGUI registerScreen = new RegisterGUI(this);
+        AdminGUI adminScreen = new AdminGUI(this);
 
+        // Collect my pages
         cardpanel.add(welcomeScreen(), "Welcome Screen");
         cardpanel.add(registerScreen, "Registration");
         cardpanel.add(loginScreen, "Login");
         cardpanel.add(storageScreen, "Storage Screen");
+        cardpanel.add(adminScreen, "Admin Screen");
 
         frame.add(cardpanel);
         cardLayout.show(cardpanel, "Welcome Screen"); // Show the first page

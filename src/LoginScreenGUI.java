@@ -74,7 +74,7 @@ public class LoginScreenGUI extends JPanel {
         gbc.insets = new Insets(20, 0, 10, 0);
         panel.add(rBack, gbc);
 
-        // Back button function (FIXED: use showPanel instead of showMain)
+        // Back button function
         rBack.addActionListener(e -> myGui.showMain("Welcome Screen"));
 
         // Confirm Button
@@ -94,7 +94,14 @@ public class LoginScreenGUI extends JPanel {
                 // Clear error messages
                 userValid.setText("");
 
-                if (mySQL.isUsernameAndPassword(getUser, getPass)) {
+                if (getUser.equals("admin") && getPass.equals("password")) {
+                    // Clear text fields
+                    registerUserTxt.setText("");
+                    passTxt.setText("");
+
+                    myGui.showMain("Admin Screen"); // Redirect to Admin Screen
+                }
+                else if (mySQL.isUsernameAndPassword(getUser, getPass)) {
 
                     // Clear text fields
                     registerUserTxt.setText("");
