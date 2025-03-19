@@ -71,6 +71,90 @@ public class MySQL {
         }
     }
 
+    public static void insertContactInfo(String email, String phoneNumber) { //this inserts a new contactInfo into the database
+        String sql = "INSERT INTO contactInfo (Email, PhoneNumber) VALUES (?, ?)";
+
+        try (Connection conn = MySQL.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, email);
+            stmt.setString(2, phoneNumber);
+            stmt.executeUpdate();
+            System.out.println("Contact Info Added!");
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static List<String> getContactEmails() {  // Gets all the emails inside of the contactInfo table and puts them into a String list
+        String sql = "SELECT * FROM contactInfo";
+        List<String> emails = new ArrayList<>();
+
+        try (Connection conn = MySQL.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                emails.add(rs.getString("Email"));
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return emails;
+    }
+
+    public static void printContactInfo() { // Prints all the contact information available.
+        List<String> phoneNumber = getContactNumbers();
+        List<String> emails = getContactEmails();
+
+        // Print phone numbers
+        System.out.println("Phone Numbers:");
+        for (String s : phoneNumber) {
+            System.out.println(s);
+        }
+
+        // Print emails
+        System.out.println("\nEmails:");
+        for (String email : emails) {
+            System.out.println(email);
+        }
+
+    }
+
+    public static List<String> getContactInformation() { //puts all contactInformation into a single List and returns it
+        List<String> phoneNumber = getContactNumbers();
+        List<String> emails = getContactEmails();
+
+        List<String> contactInformation = new ArrayList<>();
+
+        contactInformation.addAll(phoneNumber);
+
+        contactInformation.addAll(emails);
+
+        return contactInformation;
+    }
+
+
+    private static List<String> getContactNumbers() {  // Gets all the numbers inside of the contactInfo table and puts them into a String List
+        String sql = "SELECT * FROM contactInfo";
+        List<String> phoneNumbers = new ArrayList<>();
+
+        try (Connection conn = MySQL.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                phoneNumbers.add(rs.getString("PhoneNumber"));
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return phoneNumbers;
+    }
+
     public static void setEmail(String username, String email) { //checks if the given email already is connected, if not it connects the email to the given user overriding information aswell
         String sql = "UPDATE users SET email = ? WHERE username = ?";
         if(isEmail(email)) {
