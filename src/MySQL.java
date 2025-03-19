@@ -2,7 +2,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class mySQL {
+public class MySQL {
     private static final String URL = "jdbc:mysql://caboose.proxy.rlwy.net:54157/railway";
     private static final String USER = "root";
     private static final String PASSWORD = "Replace Here"; // Replace with actual password
@@ -16,7 +16,7 @@ public class mySQL {
     public static boolean isUser(String username) { //returns true if the given string username already exists
         String checkIfUsernameExists = "SELECT EXISTS (SELECT 1 FROM users WHERE username = ?)";
 
-        try (Connection conn = mySQL.getConnection();
+        try (Connection conn = MySQL.getConnection();
              PreparedStatement stmt = conn.prepareStatement(checkIfUsernameExists)) {
 
             stmt.setString(1, username);
@@ -34,10 +34,10 @@ public class mySQL {
 
     }
 
-    public static boolean isUsernameAndPassword(String username, String password) {
+    public static boolean isUsernameAndPassword(String username, String password) { // returns true if the username and password are correct.
         String checkIfUserCorrect = "SELECT EXISTS (SELECT 1 FROM users WHERE username = ? AND password = ?)";
 
-        try (Connection conn = mySQL.getConnection();
+        try (Connection conn = MySQL.getConnection();
              PreparedStatement stmt = conn.prepareStatement(checkIfUserCorrect)) {
 
             stmt.setString(1, username);
@@ -58,7 +58,7 @@ public class mySQL {
     public static void insertUser(String username, String password) { //this inserts a new user into database
         String sql = "INSERT INTO users (username, password) VALUES (?, ?)";
 
-        try (Connection conn = mySQL.getConnection();
+        try (Connection conn = MySQL.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, username);
@@ -78,7 +78,7 @@ public class mySQL {
             return;
         }
 
-        try (Connection conn = mySQL.getConnection();
+        try (Connection conn = MySQL.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, email);
             stmt.setString(2, username);
@@ -93,7 +93,7 @@ public class mySQL {
     public static boolean isEmail(String email) { //returns true if a string email is already connected to another account
         String checkIfEmailExists = "SELECT EXISTS (SELECT 1 FROM users WHERE email = ?)";
 
-        try (Connection conn = mySQL.getConnection();
+        try (Connection conn = MySQL.getConnection();
              PreparedStatement stmt = conn.prepareStatement(checkIfEmailExists)) {
 
             stmt.setString(1, email);
@@ -113,7 +113,7 @@ public class mySQL {
     public static void deleteUser(String username) { //removes user from the database based on the user
         String sql = "DELETE FROM users WHERE username = ?";
 
-        try (Connection conn = mySQL.getConnection();
+        try (Connection conn = MySQL.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, username);
@@ -127,7 +127,7 @@ public class mySQL {
         String sql = "SELECT * FROM storage";
         List<Integer> ids = new ArrayList<>();
 
-        try (Connection conn = mySQL.getConnection();
+        try (Connection conn = MySQL.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
@@ -145,7 +145,7 @@ public class mySQL {
         String sql = "SELECT * FROM storage WHERE id = ?";
         List<Object> unit = new ArrayList<>();
 
-        try (Connection conn = mySQL.getConnection();
+        try (Connection conn = MySQL.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, id);
@@ -170,7 +170,7 @@ public class mySQL {
     public static void createNewStorageUnit(String size, int price, String location) { //creates a new storageUnit
         String sql = "INSERT INTO storage (size, price, location) VALUES (?, ?, ?)";
 
-        try (Connection conn = mySQL.getConnection();
+        try (Connection conn = MySQL.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, size);

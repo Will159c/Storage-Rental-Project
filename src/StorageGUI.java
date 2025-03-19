@@ -65,10 +65,10 @@ public class StorageGUI extends JPanel {
         squaresPanel.removeAll(); // clear the boxes if it was displaying something before
 
         // Get all storage IDs from where the boy Will has the mysql database lol
-        List<Integer> allIds = mySQL.getStorageID();
+        List<Integer> allIds = MySQL.getStorageID();
 
         for (Integer id : allIds) {
-            boolean isReserved = mySQL.isUnitReserved(id);
+            boolean isReserved = MySQL.isUnitReserved(id);
             squaresPanel.add(createStorageSquare(id, isReserved));
         }
         squaresPanel.revalidate();
@@ -79,9 +79,9 @@ public class StorageGUI extends JPanel {
     private void showAvailableUnits() {
         squaresPanel.removeAll(); // Clear
 
-        List<Integer> allIds = mySQL.getStorageID();
+        List<Integer> allIds = MySQL.getStorageID();
         for (Integer id : allIds) {
-            boolean isReserved = mySQL.isUnitReserved(id);
+            boolean isReserved = MySQL.isUnitReserved(id);
             if (!isReserved) {
                 squaresPanel.add(createStorageSquare(id, false));
             }
@@ -110,7 +110,7 @@ public class StorageGUI extends JPanel {
     }
 
     private void openReservationPanel(int storageID) {
-        boolean reserved = mySQL.isUnitReserved(storageID);
+        boolean reserved = MySQL.isUnitReserved(storageID);
 
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -149,9 +149,9 @@ public class StorageGUI extends JPanel {
             if (email.isEmpty() || password.isEmpty()) return;
 
             if (reserved) {
-                mySQL.cancelReservation(storageID, email, password);
+                MySQL.cancelReservation(storageID, email, password);
             } else {
-                mySQL.reserveStorageUnit(storageID, email, password);
+                MySQL.reserveStorageUnit(storageID, email, password);
             }
 
             myGui.showMain("Storage Screen"); // Refresh display

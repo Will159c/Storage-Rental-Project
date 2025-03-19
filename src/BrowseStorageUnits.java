@@ -26,24 +26,24 @@ public class BrowseStorageUnits {
     // Option 1: Show All Units (Reserved + Available)
     private static void displayAllUnits() {
         // Reuse your existing method that returns all IDs from the 'storage' table
-        List<Integer> allIds = mySQL.getStorageID();
+        List<Integer> allIds = MySQL.getStorageID();
 
         System.out.println("\n=== ALL STORAGE UNITS ===");
         for (Integer id : allIds) {
             // Check if reserved
-            boolean reserved = mySQL.isUnitReserved(id);
+            boolean reserved = MySQL.isUnitReserved(id);
             System.out.println("Storage ID: " + id + " - " + (reserved ? "RESERVED" : "AVAILABLE"));
         }
     }
 
     // Option 2: Show Only Available Units
     private static void displayAvailableUnits() {
-        List<Integer> allIds = mySQL.getStorageID();
+        List<Integer> allIds = MySQL.getStorageID();
 
         System.out.println("\n=== AVAILABLE STORAGE UNITS ===");
         for (Integer id : allIds) {
             // Print only if it's NOT reserved
-            if (!mySQL.isUnitReserved(id)) {
+            if (!MySQL.isUnitReserved(id)) {
                 System.out.println("Storage ID: " + id);
             }
         }

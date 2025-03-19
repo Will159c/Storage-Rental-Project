@@ -180,8 +180,8 @@ public class RegisterGUI extends JPanel {
                 // Check registration validity
                 if (validate(getUser, getEmail, getPass, getCPass)) {
                     //System.out.println("Valid Registration");
-                    mySQL.insertUser(getUser, getPass); // Create account into database
-                    mySQL.setEmail(getUser, getEmail); // Add email to account
+                    MySQL.insertUser(getUser, getPass); // Create account into database
+                    MySQL.setEmail(getUser, getEmail); // Add email to account
 
                     // Dialog box
                     JOptionPane.showMessageDialog(null, "Account Successfully Created. Please Log-in.", "", JOptionPane.INFORMATION_MESSAGE);
@@ -196,7 +196,7 @@ public class RegisterGUI extends JPanel {
                     myGui.showMain("Welcome Screen");
                 }
                 else {
-                    if (mySQL.isUser(getUser)) { // Check if username is already used, if so reject registration
+                    if (MySQL.isUser(getUser)) { // Check if username is already used, if so reject registration
                         userValid.setText("Invalid Username");
                     }
                     if (getPass.length() < 4) { // Check if password is less than 4 chara
@@ -208,7 +208,7 @@ public class RegisterGUI extends JPanel {
                     if (!getEmail.contains("@")) {
                         emailValid.setText("Invalid format");
                     }
-                    if (mySQL.isEmail(getEmail)) {
+                    if (MySQL.isEmail(getEmail)) {
                         emailValid.setText("Email already in use");
                     }
                 }
@@ -220,7 +220,7 @@ public class RegisterGUI extends JPanel {
 
     public static boolean validate(String userTxt, String emailTxt, String password, String cPassword) {
 
-        if (mySQL.isUser(userTxt)) { // Check if username is already used, if so reject registration
+        if (MySQL.isUser(userTxt)) { // Check if username is already used, if so reject registration
             return false;
         }
         else if (password.length() < 4) { // Check if password is less than 4 chara
@@ -232,7 +232,7 @@ public class RegisterGUI extends JPanel {
         else if (!emailTxt.contains("@")) {
             return false;
         }
-        else if (mySQL.isEmail(emailTxt)) {
+        else if (MySQL.isEmail(emailTxt)) {
             return false;
         }
 

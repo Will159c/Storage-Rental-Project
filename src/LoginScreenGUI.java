@@ -101,7 +101,7 @@ public class LoginScreenGUI extends JPanel {
 
                     myGui.showMain("Admin Screen"); // Redirect to Admin Screen
                 }
-                else if (mySQL.isUsernameAndPassword(getUser, getPass)) {
+                else if (MySQL.isUsernameAndPassword(getUser, getPass)) {
 
                     // Clear text fields
                     registerUserTxt.setText("");

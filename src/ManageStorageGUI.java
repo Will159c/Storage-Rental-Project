@@ -12,7 +12,7 @@ public class ManageStorageGUI extends JPanel {
 
     public ManageStorageGUI(MyGUI myGui) {
         this.myGui = myGui;
-        this.storageIDs = (ArrayList<Integer>) mySQL.getStorageID();
+        this.storageIDs = (ArrayList<Integer>) MySQL.getStorageID();
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints(); // Allows for ordered positioning
 
@@ -170,7 +170,7 @@ public class ManageStorageGUI extends JPanel {
 
                 if (validateStorage(size, tempId, location)) { // Create storage in system
                     id = Integer.parseInt(tempId);
-                    mySQL.createNewStorageUnit(size, id, location);
+                    MySQL.createNewStorageUnit(size, id, location);
 
                     // Clear error messages
                     idValid.setText("");
@@ -211,7 +211,7 @@ public class ManageStorageGUI extends JPanel {
 
     public static boolean validateStorage(String size, String tempid, String location) {
 
-        List<Object> hello = mySQL.getStorageInformation(231241235);
+        List<Object> hello = MySQL.getStorageInformation(231241235);
         for (Object i : hello) { System.out.println(i); }
 
         if (tempid.matches(".*\\D.*")) { // id has non integer character
