@@ -22,7 +22,7 @@ public class ManageStorageGUI extends JPanel {
 
         // Title text
         //JLabel titleTxt = new JLabel("<html><center>Manage<br>Storage Units</center></html>", SwingConstants.CENTER);
-        JLabel titleTxt = new JLabel("Manage Storage Units", SwingConstants.CENTER);
+        JLabel titleTxt = new JLabel("Create Storage Units", SwingConstants.CENTER);
         titleTxt.setFont(new Font("SansSerif", Font.BOLD, 40));
         gbc.gridx = 0;
         gbc.gridy = 0;

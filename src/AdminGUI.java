@@ -32,7 +32,7 @@ public class AdminGUI extends JPanel {
         panel.add(userButton, gbc);
 
         // Storage Button
-        JButton storageButton = new JButton("Manage Storage Units");
+        JButton storageButton = new JButton("Create Storage Units");
         storageButton.setPreferredSize(new Dimension(100, 50));
         gbc.gridy = 2;
         gbc.gridx = 0;
@@ -54,6 +54,9 @@ public class AdminGUI extends JPanel {
 
         // Go to manage storage screen
         storageButton.addActionListener(e -> myGui.showMain("Manage Storage Screen"));
+
+        // Go to manage user screen
+        userButton.addActionListener(e -> myGui.showMain("Manage User Screen"));
 
         // Add panel to AdminGUI
         add(panel);
