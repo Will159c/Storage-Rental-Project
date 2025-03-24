@@ -267,6 +267,20 @@ public class MySQL {
         }
     }
 
+    public static void changePriceOfUnit(int id, int price) { //changes the price of a storage unit
+        String sql = "UPDATE storage SET price = ? WHERE id = ?";
+
+        try (Connection conn = MySQL.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, price);
+            stmt.setInt(2, id);
+            stmt.executeUpdate();
+
+        } catch (SQLException e){
+            throw new RuntimeException(e);
+        }
+    }
+
     public static boolean reserveStorageUnit(int storageID, String email, String password) {
         // Verify user exists and credentials are correct
         if (!isEmailAndPasswordValid(email, password)) {
