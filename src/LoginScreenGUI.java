@@ -94,20 +94,23 @@ public class LoginScreenGUI extends JPanel {
                 // Clear error messages
                 userValid.setText("");
 
-                if (getUser.equals("admin") && getPass.equals("password")) {
+                if (getUser.equals("admin") && getPass.equals("password")) { // Log in to Admin Screen
                     // Clear text fields
                     registerUserTxt.setText("");
                     passTxt.setText("");
 
                     myGui.showMain("Admin Screen"); // Redirect to Admin Screen
                 }
-                else if (MySQL.isUsernameAndPassword(getUser, getPass)) {
+                else if (MySQL.isUsernameAndPassword(getUser, getPass)) { // Log in to user screen
+
+                    // Set current username to use as entered username
+                    myGui.setUsername(getUser);
 
                     // Clear text fields
                     registerUserTxt.setText("");
                     passTxt.setText("");
 
-                    myGui.showMain("Storage Screen"); // Redirect to Storage Screen
+                    myGui.showMain("User Menu Screen"); // Redirect to User Screen
                 }
                 else {
                     userValid.setText("Invalid Credentials");

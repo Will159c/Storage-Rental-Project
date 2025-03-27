@@ -9,6 +9,8 @@ public class MyGUI {
     private static JButton loginButton;
     private static JPanel cardpanel;
     private static CardLayout cardLayout;
+    private String username;
+
     public MyGUI() {
         /////////////// Initial GUI Settings /////////////
         JFrame frame = new JFrame();
@@ -26,6 +28,7 @@ public class MyGUI {
         AdminGUI adminScreen = new AdminGUI(this);
         ManageStorageGUI storageManageScreen = new ManageStorageGUI(this);
         ManageUsersGUI userManageScreen = new ManageUsersGUI(this);
+        UserGUI userGUI = new UserGUI(this);
 
         // Collect my pages
         cardpanel.add(welcomeScreen(), "Welcome Screen");
@@ -35,6 +38,8 @@ public class MyGUI {
         cardpanel.add(adminScreen, "Admin Screen");
         cardpanel.add(storageManageScreen, "Manage Storage Screen");
         cardpanel.add(userManageScreen, "Manage User Screen");
+        cardpanel.add(userGUI, "User Menu Screen");
+
 
         frame.add(cardpanel);
         cardLayout.show(cardpanel, "Welcome Screen"); // Show the first page
@@ -98,6 +103,14 @@ public class MyGUI {
 
     public void addPanel(JPanel panel, String name) {
         cardpanel.add(panel, name);
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getUsername() {
+        return this.username;
     }
 
 }
