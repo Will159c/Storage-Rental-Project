@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.*;
 import java.util.List;
 import java.util.Comparator;
 
@@ -9,29 +10,17 @@ public class StorageGUI extends JPanel {
     private JPanel squaresPanel;
     private JScrollPane scrollPane;
 
-    // New inner class to hold storage details for sorting
-    private static class StorageDetails {
-        private int id;
-        private String size;
-        private int price;
-        private boolean reserved;
+    // NEW: In-memory list of storage units to avoid repeated DB calls
+    private List<MySQL.StorageDetails> allUnits;
 
-        public StorageDetails(int id, String size, int price, boolean reserved) {
-            this.id = id;
-            this.size = size;
-            this.price = price;
-            this.reserved = reserved;
-        }
-
-        public int getId() { return id; }
-        public String getSize() { return size; }
-        public int getPrice() { return price; }
-        public boolean isReserved() { return reserved; }
-    }
+    // Removed the original inner StorageDetails class; now using MySQL.StorageDetails
 
     public StorageGUI(MyGUI myGui) {
         this.myGui = myGui;
         setLayout(new BorderLayout());
+
+        // NEW: Load all storage units in one call
+        allUnits = MySQL.getAllStorageDetails();
 
         // title
         JLabel titleTxt = new JLabel("Storage Units Browser", SwingConstants.CENTER);
@@ -59,15 +48,16 @@ public class StorageGUI extends JPanel {
 
         // combo box for size sort options
         String[] sizeOptions = {
-                "Sort by Size: Biggest to Smallest",
-                "Sort by Size: Smallest to Biggest"
+                "Sort by Size: Smallest to Biggest",
+                "Sort by Size: Biggest to Smallest"
         };
         JComboBox<String> sizeSortCombo = new JComboBox<>(sizeOptions);
         sizeSortCombo.addActionListener(e -> {
+            // Here, adjust the order as needed (true/false) based on your original behavior
             if (sizeSortCombo.getSelectedIndex() == 0) {
-                showUnitsSortedBySize(true);
-            } else {
                 showUnitsSortedBySize(false);
+            } else {
+                showUnitsSortedBySize(true);
             }
         });
 
@@ -75,6 +65,30 @@ public class StorageGUI extends JPanel {
         topBtnPanel.add(viewAvailBtn);
         topBtnPanel.add(priceSortCombo);
         topBtnPanel.add(sizeSortCombo);
+
+        // NEW: Combo box for filtering by location
+        Set<String> locationSet = new HashSet<>();
+        for (MySQL.StorageDetails sd : allUnits) {
+            locationSet.add(sd.getLocation());
+        }
+        List<String> locations = new ArrayList<>(locationSet);
+        Collections.sort(locations);  // sort alphabetically
+        String[] locationOptions = new String[locations.size() + 1];
+        locationOptions[0] = "All Locations";
+        for (int i = 0; i < locations.size(); i++) {
+            locationOptions[i + 1] = locations.get(i);
+        }
+        JComboBox<String> locationCombo = new JComboBox<>(locationOptions);
+        locationCombo.addActionListener(e -> {
+            String selected = (String) locationCombo.getSelectedItem();
+            if (selected.equals("All Locations")) {
+                showAllUnits();
+            } else {
+                showUnitsFilteredByLocation(selected);
+            }
+        });
+        topBtnPanel.add(locationCombo);
+
         add(topBtnPanel, BorderLayout.PAGE_START);
 
         // it lets us scroll when there are more units than the screen fits
@@ -84,7 +98,7 @@ public class StorageGUI extends JPanel {
         scrollPane = new JScrollPane(squaresPanel);
         add(scrollPane, BorderLayout.CENTER);
 
-        // a back button that sends the user back to the welcom screen
+        // a back button that sends the user back to the welcome screen
         JButton backBtn = new JButton("Back");
         backBtn.addActionListener(e -> myGui.showMain("Welcome Screen"));
         add(backBtn, BorderLayout.SOUTH);
@@ -94,111 +108,99 @@ public class StorageGUI extends JPanel {
         viewAvailBtn.addActionListener(e -> showAvailableUnits());
     }
 
-    // this is what the view all units button uses
+    // NEW: Updated to use in-memory list instead of DB calls per unit
     private void showAllUnits() {
         squaresPanel.removeAll();
-        List<Integer> allIds = MySQL.getStorageID();
-        for (Integer id : allIds) {
-            boolean isReserved = MySQL.isUnitReserved(id);
-            squaresPanel.add(createStorageSquare(id, isReserved));
+        for (MySQL.StorageDetails sd : allUnits) {
+            squaresPanel.add(createStorageSquare(sd));
         }
         squaresPanel.revalidate();
         squaresPanel.repaint();
     }
 
-    // this is what the show all units button uses
+    // NEW: Updated to use in-memory list
     private void showAvailableUnits() {
         squaresPanel.removeAll();
-        List<Integer> allIds = MySQL.getStorageID();
-        for (Integer id : allIds) {
-            boolean isReserved = MySQL.isUnitReserved(id);
-            if (!isReserved) {
-                squaresPanel.add(createStorageSquare(id, false));
+        for (MySQL.StorageDetails sd : allUnits) {
+            if (!sd.isReserved()) {
+                squaresPanel.add(createStorageSquare(sd));
             }
         }
         squaresPanel.revalidate();
         squaresPanel.repaint();
     }
 
-    // This is for sorting by price
+    // NEW: Updated sorting by price using in-memory list
     private void showUnitsSortedByPrice(boolean ascending) {
         squaresPanel.removeAll();
-        List<Integer> allIds = MySQL.getStorageID();
-        java.util.List<StorageDetails> units = new java.util.ArrayList<>();
-        for (Integer id : allIds) {
-            boolean reserved = MySQL.isUnitReserved(id);
-            List<Object> info = MySQL.getStorageInformation(id);
-            String size = (String) info.get(1);
-            int price = (Integer) info.get(2);
-            units.add(new StorageDetails(id, size, price, reserved));
-        }
+        List<MySQL.StorageDetails> sorted = new ArrayList<>(allUnits);
         if (ascending) {
-            units.sort(Comparator.comparingInt(StorageDetails::getPrice));
+            sorted.sort(Comparator.comparingInt(MySQL.StorageDetails::getPrice));
         } else {
-            units.sort(Comparator.comparingInt(StorageDetails::getPrice).reversed());
+            sorted.sort(Comparator.comparingInt(MySQL.StorageDetails::getPrice).reversed());
         }
-        for (StorageDetails unit : units) {
-            squaresPanel.add(createStorageSquare(unit.getId(), unit.isReserved(), unit.getSize(), unit.getPrice()));
+        for (MySQL.StorageDetails sd : sorted) {
+            squaresPanel.add(createStorageSquare(sd));
         }
         squaresPanel.revalidate();
         squaresPanel.repaint();
     }
 
-    // Sorts units by size
+    // NEW: Updated sorting by size using in-memory list
     private void showUnitsSortedBySize(boolean ascending) {
         squaresPanel.removeAll();
-        List<Integer> allIds = MySQL.getStorageID();
-        java.util.List<StorageDetails> units = new java.util.ArrayList<>();
-        for (Integer id : allIds) {
-            boolean reserved = MySQL.isUnitReserved(id);
-            List<Object> info = MySQL.getStorageInformation(id);
-            String size = (String) info.get(1);
-            int price = (Integer) info.get(2);
-            units.add(new StorageDetails(id, size, price, reserved));
-        }
+        List<MySQL.StorageDetails> sorted = new ArrayList<>(allUnits);
         if (ascending) {
-            units.sort(Comparator.comparing(StorageDetails::getSize, String.CASE_INSENSITIVE_ORDER));
+            sorted.sort(Comparator.comparing(MySQL.StorageDetails::getSize, String.CASE_INSENSITIVE_ORDER));
         } else {
-            units.sort(Comparator.comparing(StorageDetails::getSize, String.CASE_INSENSITIVE_ORDER).reversed());
+            sorted.sort(Comparator.comparing(MySQL.StorageDetails::getSize, String.CASE_INSENSITIVE_ORDER).reversed());
         }
-        for (StorageDetails unit : units) {
-            squaresPanel.add(createStorageSquare(unit.getId(), unit.isReserved(), unit.getSize(), unit.getPrice()));
+        for (MySQL.StorageDetails sd : sorted) {
+            squaresPanel.add(createStorageSquare(sd));
         }
         squaresPanel.revalidate();
         squaresPanel.repaint();
     }
 
-    private JPanel createStorageSquare(int storageID, boolean reserved, String size, int price) {
+    // NEW: Updated filtering by location using in-memory list
+    private void showUnitsFilteredByLocation(String location) {
+        squaresPanel.removeAll();
+        for (MySQL.StorageDetails sd : allUnits) {
+            if (sd.getLocation().equalsIgnoreCase(location)) {
+                squaresPanel.add(createStorageSquare(sd));
+            }
+        }
+        squaresPanel.revalidate();
+        squaresPanel.repaint();
+    }
+
+    // NEW: Updated createStorageSquare to display location as well
+    private JPanel createStorageSquare(MySQL.StorageDetails sd) {
         JPanel unitPanel = new JPanel();
-        unitPanel.setPreferredSize(new Dimension(120, 120));
+        // Increased height to accommodate location display
+        unitPanel.setPreferredSize(new Dimension(120, 140));
         unitPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         unitPanel.setLayout(new GridBagLayout());
         unitPanel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                openReservationPanel(storageID);
+                openReservationPanel(sd.getId());
             }
         });
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 0;
-        unitPanel.add(new JLabel("ID: " + storageID), gbc);
+        unitPanel.add(new JLabel("ID: " + sd.getId()), gbc);
         gbc.gridy++;
-        unitPanel.add(new JLabel("Size: " + size), gbc);
+        unitPanel.add(new JLabel("Size: " + sd.getSize()), gbc);
         gbc.gridy++;
-        unitPanel.add(new JLabel("Price: $" + price), gbc);
+        unitPanel.add(new JLabel("Price: $" + sd.getPrice()), gbc);
+        gbc.gridy++;
+        unitPanel.add(new JLabel("Location: " + sd.getLocation()), gbc);
         return unitPanel;
     }
 
-    // Original method updated to fetch size and price
-    private JPanel createStorageSquare(int storageID, boolean reserved) {
-        List<Object> info = MySQL.getStorageInformation(storageID);
-        String size = (String) info.get(1);
-        int price = (Integer) info.get(2);
-        return createStorageSquare(storageID, reserved, size, price);
-    }
-
-    // Opens the reservation panel for a given storage unit
+    // The openReservationPanel method remains unchanged
     private void openReservationPanel(int storageID) {
         boolean reserved = MySQL.isUnitReserved(storageID);
         JPanel panel = new JPanel(new GridBagLayout());
@@ -242,6 +244,8 @@ public class StorageGUI extends JPanel {
             } else {
                 MySQL.reserveStorageUnit(storageID, email, password);
             }
+            // NEW: Refresh the in-memory list after reservation changes
+            allUnits = MySQL.getAllStorageDetails();
             myGui.showMain("Storage Screen");
         });
         panel.add(actionButton, gbc);

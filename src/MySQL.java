@@ -7,13 +7,61 @@ public class MySQL {
     private static final String USER = "root";
     private static final String PASSWORD = "Replace Here"; // Replace with actual password
 
-    private static Connection getConnection() throws SQLException {  //this gets the connection to the database
-
+    private static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(URL, USER, PASSWORD);
-
     }
 
-    public static boolean isUser(String username) { //returns true if the given string username already exists
+
+    // NEW: Added inner class to hold storage unit details in memory
+    public static class StorageDetails {
+        private int id;
+        private String size;
+        private int price;
+        private String location;
+        private boolean reserved;
+
+        public StorageDetails(int id, String size, int price, String location, boolean reserved) {
+            this.id = id;
+            this.size = size;
+            this.price = price;
+            this.location = location;
+            this.reserved = reserved;
+        }
+
+        public int getId() { return id; }
+        public String getSize() { return size; }
+        public int getPrice() { return price; }
+        public String getLocation() { return location; }
+        public boolean isReserved() { return reserved; }
+    }
+    // get info of the storages in one function
+    public static List<StorageDetails> getAllStorageDetails() {
+        String sql = "SELECT s.id, s.size, s.price, s.location, r.storage_id AS reserved " +
+                "FROM storage s " +
+                "LEFT JOIN storage_reservations r ON s.id = r.storage_id";
+
+        List<StorageDetails> allUnits = new ArrayList<>();
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String size = rs.getString("size");
+                int price = rs.getInt("price");
+                String location = rs.getString("location");
+                boolean isReserved = (rs.getObject("reserved") != null);
+                allUnits.add(new StorageDetails(id, size, price, location, isReserved));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return allUnits;
+    }
+
+public static boolean isUser(String username) { //returns true if the given string username already exists
         String checkIfUsernameExists = "SELECT EXISTS (SELECT 1 FROM users WHERE username = ?)";
 
         try (Connection conn = MySQL.getConnection();
