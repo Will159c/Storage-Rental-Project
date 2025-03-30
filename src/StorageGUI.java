@@ -66,7 +66,6 @@ public class StorageGUI extends JPanel {
         topBtnPanel.add(priceSortCombo);
         topBtnPanel.add(sizeSortCombo);
 
-        // NEW: Combo box for filtering by location
         Set<String> locationSet = new HashSet<>();
         for (MySQL.StorageDetails sd : allUnits) {
             locationSet.add(sd.getLocation());
@@ -108,7 +107,6 @@ public class StorageGUI extends JPanel {
         viewAvailBtn.addActionListener(e -> showAvailableUnits());
     }
 
-    // NEW: Updated to use in-memory list instead of DB calls per unit
     private void showAllUnits() {
         squaresPanel.removeAll();
         for (MySQL.StorageDetails sd : allUnits) {
@@ -118,7 +116,6 @@ public class StorageGUI extends JPanel {
         squaresPanel.repaint();
     }
 
-    // NEW: Updated to use in-memory list
     private void showAvailableUnits() {
         squaresPanel.removeAll();
         for (MySQL.StorageDetails sd : allUnits) {
@@ -130,7 +127,6 @@ public class StorageGUI extends JPanel {
         squaresPanel.repaint();
     }
 
-    // NEW: Updated sorting by price using in-memory list
     private void showUnitsSortedByPrice(boolean ascending) {
         squaresPanel.removeAll();
         List<MySQL.StorageDetails> sorted = new ArrayList<>(allUnits);
@@ -146,7 +142,6 @@ public class StorageGUI extends JPanel {
         squaresPanel.repaint();
     }
 
-    // NEW: Updated sorting by size using in-memory list
     private void showUnitsSortedBySize(boolean ascending) {
         squaresPanel.removeAll();
         List<MySQL.StorageDetails> sorted = new ArrayList<>(allUnits);
@@ -162,7 +157,6 @@ public class StorageGUI extends JPanel {
         squaresPanel.repaint();
     }
 
-    // NEW: Updated filtering by location using in-memory list
     private void showUnitsFilteredByLocation(String location) {
         squaresPanel.removeAll();
         for (MySQL.StorageDetails sd : allUnits) {
@@ -174,10 +168,8 @@ public class StorageGUI extends JPanel {
         squaresPanel.repaint();
     }
 
-    // NEW: Updated createStorageSquare to display location as well
     private JPanel createStorageSquare(MySQL.StorageDetails sd) {
         JPanel unitPanel = new JPanel();
-        // Increased height to accommodate location display
         unitPanel.setPreferredSize(new Dimension(120, 140));
         unitPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         unitPanel.setLayout(new GridBagLayout());
