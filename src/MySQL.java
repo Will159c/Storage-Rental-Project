@@ -376,7 +376,8 @@ public static boolean isUser(String username) { //returns true if the given stri
         }
 
         String checkAvailability = "SELECT * FROM storage_reservations WHERE storage_id = ?";
-        String reserveUnit = "INSERT INTO storage_reservations (storage_id, customer_name, customer_email) VALUES (?, ?, ?)";
+        String reserveUnit = "INSERT INTO storage_reservations (storage_id, customer_email, user_id) VALUES (?, ?, ?)";
+
 
         try (Connection conn = getConnection();
              PreparedStatement checkStmt = conn.prepareStatement(checkAvailability);
@@ -389,8 +390,8 @@ public static boolean isUser(String username) { //returns true if the given stri
                 return false;  // Already reserved
             } else {
                 reserveStmt.setInt(1, storageID);
-                reserveStmt.setInt(2, id_user);
                 reserveStmt.setString(2, email);
+                reserveStmt.setInt(3, id_user);
                 if (reserveStmt.executeUpdate() > 0) {
                     // Send email notification
                     EmailNotifier.sendEmail(email, "Storage Unit Reserved",
@@ -510,5 +511,19 @@ public static boolean isUser(String username) { //returns true if the given stri
             return false;
         }
     }
-
+    public static int getUserIDByEmail(String email) {
+        String sql = "SELECT id FROM users WHERE email = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, email);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("id");
+            } else {
+                throw new RuntimeException("No user found with email: " + email);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

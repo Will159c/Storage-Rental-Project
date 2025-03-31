@@ -4,6 +4,10 @@ import java.awt.event.*;
 import java.util.*;
 import java.util.List;
 import java.util.Comparator;
+import javax.swing.text.PlainDocument;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+
 
 public class StorageGUI extends JPanel {
     private MyGUI myGui;
@@ -192,7 +196,6 @@ public class StorageGUI extends JPanel {
         return unitPanel;
     }
 
-    // The openReservationPanel method remains unchanged
     private void openReservationPanel(int storageID) {
         boolean reserved = MySQL.isUnitReserved(storageID);
         JPanel panel = new JPanel(new GridBagLayout());
@@ -223,26 +226,63 @@ public class StorageGUI extends JPanel {
         JPasswordField passwordField = new JPasswordField(15);
         panel.add(passwordField, gbc);
 
-        gbc.gridy = 3;
+        // Card Number
+        JPasswordField cardField = new JPasswordField();
+        if (!reserved) {
+            gbc.gridy = 3;
+            gbc.gridx = 0;
+            panel.add(new JLabel("Enter 16 Digit Card Number:"), gbc);
+            gbc.gridx = 1;
+            // 16 digits only, no spaces
+            cardField.setDocument(new PlainDocument() {
+                @Override
+                public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
+                    if (str == null) return;
+
+                    // Only allow digits, max 16 characters, no spaces
+                    if (str.matches("\\d+") && (getLength() + str.length() <= 16)) {
+                        super.insertString(offs, str, a);
+                    }
+                }
+            });
+
+            panel.add(cardField, gbc);
+        }
+
+        gbc.gridy = 4;
         gbc.gridx = 0;
         gbc.gridwidth = 2;
         JButton actionButton = new JButton(reserved ? "Cancel Reservation" : "Reserve");
         actionButton.addActionListener(e -> {
-            String email = emailField.getText();
-            String password = new String(passwordField.getPassword());
+            String email = emailField.getText().trim();
+            String password = new String(passwordField.getPassword()).trim();
+            String cardNumber = new String(cardField.getPassword()).trim();
+
+            int userID = (myGui.getUsername() != null)
+                    ? MySQL.getUserID(myGui.getUsername())
+                    : MySQL.getUserIDByEmail(email);
+
             if (email.isEmpty() || password.isEmpty()) return;
+
             if (reserved) {
                 MySQL.cancelReservation(storageID, email, password);
+                JOptionPane.showMessageDialog(null, "Reservation canceled!", "Success", JOptionPane.INFORMATION_MESSAGE);
             } else {
-                MySQL.reserveStorageUnit(storageID, email, 12, password);
+                if (!cardNumber.matches("\\d{16}")) {
+                    JOptionPane.showMessageDialog(null, "Please enter a valid 16-digit card number", "Invalid Card", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                MySQL.reserveStorageUnit(storageID, email, userID, password);
+                JOptionPane.showMessageDialog(null, "Reservation successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
             }
-            // NEW: Refresh the in-memory list after reservation changes
-            allUnits = MySQL.getAllStorageDetails();
+
+            allUnits = MySQL.getAllStorageDetails();  // Refresh units
             myGui.showMain("Storage Screen");
+
         });
         panel.add(actionButton, gbc);
 
-        gbc.gridy = 4;
+        gbc.gridy = 5;
         JButton backButton = new JButton("Back");
         backButton.addActionListener(e -> myGui.showMain("Storage Screen"));
         panel.add(backButton, gbc);
