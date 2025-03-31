@@ -234,7 +234,7 @@ public class StorageGUI extends JPanel {
             if (reserved) {
                 MySQL.cancelReservation(storageID, email, password);
             } else {
-                MySQL.reserveStorageUnit(storageID, email, password);
+                MySQL.reserveStorageUnit(storageID, email, 12, password);
             }
             // NEW: Refresh the in-memory list after reservation changes
             allUnits = MySQL.getAllStorageDetails();

@@ -292,7 +292,6 @@ public static boolean isUser(String username) { //returns true if the given stri
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
             throw new RuntimeException(e);
         }
 
@@ -329,7 +328,47 @@ public static boolean isUser(String username) { //returns true if the given stri
         }
     }
 
-    public static boolean reserveStorageUnit(int storageID, String email, String password) {
+    public static List<Integer> getUserReservations(int id_user) { //this takes a input of a user id and returns a list of storage id's that that user has reserved
+        String sql = "SELECT * FROM storage_reservations WHERE customer_name = ?";
+        List<Integer> storageID = new ArrayList<>();
+
+        try (Connection conn = MySQL.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, id_user);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                storageID.add(rs.getInt("storage_id"));
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return storageID;
+    }
+
+    public static int getUserID(String username) { // this takes input of a username and returns the id of the given user
+        String sql = "SELECT * FROM users WHERE userName = ?";
+
+        try (Connection conn = MySQL.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, username);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("id");
+            } else {
+                throw new RuntimeException("No user found with username: " + username);
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public static boolean reserveStorageUnit(int storageID, String email, int id_user, String password) { //this reserves a unit with the related inputs
         // Verify user exists and credentials are correct
         if (!isEmailAndPasswordValid(email, password)) {
             System.out.println("Invalid email or password.");
@@ -337,7 +376,7 @@ public static boolean isUser(String username) { //returns true if the given stri
         }
 
         String checkAvailability = "SELECT * FROM storage_reservations WHERE storage_id = ?";
-        String reserveUnit = "INSERT INTO storage_reservations (storage_id, customer_email) VALUES (?, ?)";
+        String reserveUnit = "INSERT INTO storage_reservations (storage_id, customer_name, customer_email) VALUES (?, ?, ?)";
 
         try (Connection conn = getConnection();
              PreparedStatement checkStmt = conn.prepareStatement(checkAvailability);
@@ -350,6 +389,7 @@ public static boolean isUser(String username) { //returns true if the given stri
                 return false;  // Already reserved
             } else {
                 reserveStmt.setInt(1, storageID);
+                reserveStmt.setInt(2, id_user);
                 reserveStmt.setString(2, email);
                 if (reserveStmt.executeUpdate() > 0) {
                     // Send email notification
