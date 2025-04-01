@@ -107,7 +107,7 @@ public class LoginScreenGUI extends JPanel {
                     registerUserTxt.setText("");
                     passTxt.setText("");
 
-                    myGui.loginUser(getUser); // Redirect to User Screen by passing to MyGUI
+                    myGui.loginUser(getUser); // Redirect to User Screen by passing to MyGUI to save user info
                 }
                 else {
                     userValid.setText("Invalid Credentials");

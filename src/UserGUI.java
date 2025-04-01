@@ -52,7 +52,7 @@ public class UserGUI extends JPanel {
         add(panel);
     }
 
-    public void setUsername(String username) {
+    public void setUsername(String username) { // Set up
         titleTxt.setText("Welcome " + username);
     }
 }

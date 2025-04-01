@@ -114,7 +114,7 @@ public class MyGUI {
         return this.username;
     }
 
-    public void loginUser(String user) {
+    public void loginUser(String user) { // Allow for information to be passed after login
         userGUI.setUsername(user);
         cardLayout.show(cardpanel, "User Screen");
     }
