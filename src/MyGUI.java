@@ -10,6 +10,7 @@ public class MyGUI {
     private static JPanel cardpanel;
     private static CardLayout cardLayout;
     private String username;
+    private UserGUI userGUI; // make userGUI be a private attribute to be able to invoke it elsewhere
 
     public MyGUI() {
         /////////////// Initial GUI Settings /////////////
@@ -21,14 +22,14 @@ public class MyGUI {
         cardLayout = new CardLayout();
         cardpanel = new JPanel(cardLayout);
 
-        // GUI pages
+        // GUI pages and userGUI setup
         LoginScreenGUI loginScreen = new LoginScreenGUI(this);
         StorageGUI storageScreen = new StorageGUI(this);
         RegisterGUI registerScreen = new RegisterGUI(this);
         AdminGUI adminScreen = new AdminGUI(this);
         ManageStorageGUI storageManageScreen = new ManageStorageGUI(this);
         ManageUsersGUI userManageScreen = new ManageUsersGUI(this);
-        UserGUI userGUI = new UserGUI(this);
+        userGUI = new UserGUI(this);
 
         // Collect my pages
         cardpanel.add(welcomeScreen(), "Welcome Screen");
@@ -38,7 +39,7 @@ public class MyGUI {
         cardpanel.add(adminScreen, "Admin Screen");
         cardpanel.add(storageManageScreen, "Manage Storage Screen");
         cardpanel.add(userManageScreen, "Manage User Screen");
-        cardpanel.add(userGUI, "User Menu Screen");
+        cardpanel.add(userGUI, "User Screen");
 
 
         frame.add(cardpanel);
@@ -111,6 +112,11 @@ public class MyGUI {
 
     public String getUsername() {
         return this.username;
+    }
+
+    public void loginUser(String user) {
+        userGUI.setUsername(user);
+        cardLayout.show(cardpanel, "User Screen");
     }
 
 }

@@ -103,14 +103,11 @@ public class LoginScreenGUI extends JPanel {
                 }
                 else if (MySQL.isUsernameAndPassword(getUser, getPass)) { // Log in to user screen
 
-                    // Set current username to use as entered username
-                    myGui.setUsername(getUser);
-
                     // Clear text fields
                     registerUserTxt.setText("");
                     passTxt.setText("");
 
-                    myGui.showMain("User Menu Screen"); // Redirect to User Screen
+                    myGui.loginUser(getUser); // Redirect to User Screen by passing to MyGUI
                 }
                 else {
                     userValid.setText("Invalid Credentials");

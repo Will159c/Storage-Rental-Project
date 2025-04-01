@@ -4,20 +4,19 @@ import java.awt.*;
 public class UserGUI extends JPanel {
 
     private MyGUI myGui;
+    private JLabel titleTxt;
 
     public UserGUI(MyGUI myGUI) {
         this.myGui = myGUI;
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints(); // Allows for ordered positioning
-        String username = myGui.getUsername();
-        String welcomeText = "Welcome " + username;
 
         // Create a panel with GridBagLayout
         JPanel panel = new JPanel(new GridBagLayout());
         gbc.fill = GridBagConstraints.HORIZONTAL; // Stretch components horizontally
 
         // Title text
-        JLabel titleTxt = new JLabel(welcomeText, SwingConstants.CENTER);
+        titleTxt = new JLabel("Welcome", SwingConstants.CENTER);
         titleTxt.setFont(new Font("SansSerif", Font.BOLD, 40));
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -51,5 +50,9 @@ public class UserGUI extends JPanel {
         panel.add(rBack, gbc);
 
         add(panel);
+    }
+
+    public void setUsername(String username) {
+        titleTxt.setText("Welcome " + username);
     }
 }
