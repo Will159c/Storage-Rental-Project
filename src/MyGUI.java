@@ -29,7 +29,6 @@ public class MyGUI {
         AdminGUI adminScreen = new AdminGUI(this);
         ManageStorageGUI storageManageScreen = new ManageStorageGUI(this);
         ManageUsersGUI userManageScreen = new ManageUsersGUI(this);
-        userGUI = new UserGUI(this);
 
         // Collect my pages
         cardpanel.add(welcomeScreen(), "Welcome Screen");
@@ -39,7 +38,6 @@ public class MyGUI {
         cardpanel.add(adminScreen, "Admin Screen");
         cardpanel.add(storageManageScreen, "Manage Storage Screen");
         cardpanel.add(userManageScreen, "Manage User Screen");
-        cardpanel.add(userGUI, "User Screen");
 
 
         frame.add(cardpanel);
@@ -115,7 +113,11 @@ public class MyGUI {
     }
 
     public void loginUser(String user) { // Allow for information to be passed after login
-        userGUI.setUsername(user);
+        // Set the information ready for User GUI
+        userGUI = new UserGUI(this, user);
+        cardpanel.add(userGUI, "User Screen");
+
+        // Switch the User GUI
         cardLayout.show(cardpanel, "User Screen");
     }
 

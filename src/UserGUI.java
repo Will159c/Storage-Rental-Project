@@ -7,10 +7,13 @@ public class UserGUI extends JPanel {
     private MyGUI myGui;
     private JLabel titleTxt;
     private String username;
-    private static ArrayList<Integer> storageIDs = new ArrayList<Integer>();
+    private static ArrayList<Integer> storageIDs;
 
-    public UserGUI(MyGUI myGUI) {
+    public UserGUI(MyGUI myGUI, String username) {
         this.myGui = myGUI;
+        this.username = username;
+        int userid = MySQL.getUserID(username);
+        this.storageIDs = (ArrayList<Integer>) MySQL.getUserReservations(userid);
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints(); // Allows for ordered positioning
 
@@ -19,7 +22,7 @@ public class UserGUI extends JPanel {
         gbc.fill = GridBagConstraints.HORIZONTAL; // Stretch components horizontally
 
         // Title text
-        titleTxt = new JLabel("", SwingConstants.CENTER);
+        titleTxt = new JLabel("Welcome " + username, SwingConstants.CENTER);
         titleTxt.setFont(new Font("SansSerif", Font.BOLD, 40));
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -80,14 +83,5 @@ public class UserGUI extends JPanel {
         rBack.addActionListener(e -> myGui.showMain("Welcome Screen"));
 
         add(panel);
-    }
-
-    public void setUsername(String username) { // Set up
-        this.username = username;
-        titleTxt.setText("Welcome " + username);
-    }
-
-    public String getUsername() {
-        return username;
     }
 }
