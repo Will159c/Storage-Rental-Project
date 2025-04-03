@@ -1,4 +1,6 @@
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.util.ArrayList;
 
@@ -8,9 +10,12 @@ public class UserGUI extends JPanel {
     private JLabel titleTxt;
     private String username;
     private static ArrayList<Integer> storageIDs;
+    //private static ArrayList<Object> unitDetails = new ArrayList<Object>();
+    private DefaultListModel<Object> listModel;
 
     public UserGUI(MyGUI myGUI, String username) {
         this.myGui = myGUI;
+        this.listModel = new DefaultListModel<>();
         this.username = username;
         int userid = MySQL.getUserID(username);
         this.storageIDs = (ArrayList<Integer>) MySQL.getUserReservations(userid);
@@ -50,13 +55,35 @@ public class UserGUI extends JPanel {
         gbc.anchor = GridBagConstraints.EAST; // Keep this to the left
         panel.add(storageInfo, gbc);
 
-        // Display storage unit list
+        /////// Storage unit list and details /////////
+        // List of reserved units
         JList<Integer> list = new JList<>(storageIDs.toArray(new Integer[0]));
         JScrollPane scrollPane = new JScrollPane(list);
         gbc.gridx = 0;
         gbc.gridy = 2;
         scrollPane.setPreferredSize(new Dimension(100, 100)); // Set fixed size for list
+        list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         panel.add(scrollPane, gbc);
+
+        // Show unit details as a JList
+        JList unitDeets = new JList<>(listModel);
+        JScrollPane scrollPaneDeets = new JScrollPane(unitDeets);
+        gbc.gridx = 1;
+        gbc.gridy = 2;
+        scrollPaneDeets.setPreferredSize(new Dimension(100, 100)); // Set fixed size for list
+        list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        panel.add(scrollPaneDeets, gbc);
+
+        // Give Storage unit details
+        list.addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                if (!e.getValueIsAdjusting()) { // Prevents multiple events
+                    ArrayList<Object> unitDetails = new ArrayList<Object>(MySQL.getStorageInformation(list.getSelectedValue()));
+                    refreshList(unitDetails);
+                }
+            }
+        });
 
         ////////// Buttons ///////////
 
@@ -83,5 +110,12 @@ public class UserGUI extends JPanel {
         rBack.addActionListener(e -> myGui.showMain("Welcome Screen"));
 
         add(panel);
+    }
+
+    private void refreshList(ArrayList<Object> unitDetails) {
+        listModel.clear();
+        for (Object obj : unitDetails) {
+            listModel.addElement(obj);
+        }
     }
 }
