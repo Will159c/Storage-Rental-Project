@@ -2,20 +2,12 @@ public class Customer {
     String username;
     String password;
     String email;
-    public Customer(String username, String password) {
+    public Customer(String username, String password, String email) {
         this.username = username;
         this.password = password;
-        MySQL.insertUser(username, password); //adds the user to the database
-
-    }
-
-    public void setEmailCustomer(String email) {  //sets an email to a specific customer object and puts it into the database
-        if(MySQL.isEmail(email)) {
-            System.out.println("Email Already Taken");
-            return;
-        }
-        MySQL.setEmail(username, email);
         this.email = email;
+        MySQL.insertUser(username, password, email); //adds the user to the database
+
     }
 
     public void deleteCustomer() { //deletes the user

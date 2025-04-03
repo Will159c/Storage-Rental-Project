@@ -1,11 +1,15 @@
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.net.URL;
 
 public class MySQL {
     private static final String URL = "jdbc:mysql://caboose.proxy.rlwy.net:54157/railway";
     private static final String USER = "root";
-    private static final String PASSWORD = "Replace Here"; // Replace with actual password
+    private static final String PASSWORD = "OaWunWeWjnACHWrhVxwAIQJVZPtotFuD"; // Replace with actual password
 
     private static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(URL, USER, PASSWORD);
@@ -103,21 +107,55 @@ public static boolean isUser(String username) { //returns true if the given stri
         }
     }
 
-    public static void insertUser(String username, String password) { //this inserts a new user into database
-        String sql = "INSERT INTO users (username, password) VALUES (?, ?)";
+    public static void insertUser(String username, String password, String email) { //this inserts a new user into the database
+        try {
+            URL url = new URL("http://localhost:8080/api/users");
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("POST");
+            con.setRequestProperty("Content-Type", "application/json");
+            con.setDoOutput(true);
 
-        try (Connection conn = MySQL.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            String jsonInputString = String.format(
+                    "{\"username\":\"%s\", \"email\":\"%s\", \"password\":\"%s\"}",
+                    username, email, password
+            );
 
-            stmt.setString(1, username);
-            stmt.setString(2, password);
-            stmt.executeUpdate();
-            System.out.println("User " + username + " added!");
+            try (OutputStream os = con.getOutputStream()) {
+                byte[] input = jsonInputString.getBytes("utf-8");
+                os.write(input, 0, input.length);
+            }
 
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+            int code = con.getResponseCode();
+            System.out.println("Response Code: " + code);
+
+            if (code == 200 || code == 201) {
+                System.out.println("User created successfully.");
+            } else {
+                System.out.println("Error creating user.");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
+
+
+//    public static void insertUser(String username, String password, String email) { //old insertUser method. Updated API method above.
+//        String sql = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
+//
+//        try (Connection conn = MySQL.getConnection();
+//             PreparedStatement stmt = conn.prepareStatement(sql)) {
+//
+//            stmt.setString(1, username);
+//            stmt.setString(2, password);
+//            stmt.setString(3, email);
+//            stmt.executeUpdate();
+//            System.out.println("User " + username + " added!");
+//
+//        } catch (SQLException e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
 
     public static void insertContactInfo(String email, String phoneNumber) { //this inserts a new contactInfo into the database
         String sql = "INSERT INTO contactInfo (Email, PhoneNumber) VALUES (?, ?)";
@@ -460,36 +498,6 @@ public static boolean isUser(String username) { //returns true if the given stri
         } catch (SQLException e) {
             System.err.println("Error checking reservation status: " + e.getMessage());
             return false;
-        }
-    }
-
-    public static void createReservationsTable() {
-        String createTableSQL = "CREATE TABLE IF NOT EXISTS storage_reservations (" +
-                "storage_id INT PRIMARY KEY, " +
-                "customer_email VARCHAR(255) NOT NULL, " +
-                "customer_name VARCHAR(255) NULL" +
-                ")";
-
-        String checkColumnSQL = "SHOW COLUMNS FROM storage_reservations LIKE 'customer_name'";
-        String modifyColumnSQL = "ALTER TABLE storage_reservations MODIFY COLUMN customer_name VARCHAR(255) NULL";
-
-        try (Connection conn = getConnection();
-             Statement stmt = conn.createStatement()) {
-
-            // Create the table if it doesn't exist
-            stmt.executeUpdate(createTableSQL);
-            System.out.println("Checked/Created table: storage_reservations");
-
-            // Check if the customer_name column exists and update it to allow NULL
-            try (ResultSet rs = stmt.executeQuery(checkColumnSQL)) {
-                if (rs.next()) { // If the column exists, make it nullable
-                    stmt.executeUpdate(modifyColumnSQL);
-                    System.out.println("Updated column: customer_name is now optional.");
-                }
-            }
-
-        } catch (SQLException e) {
-            System.err.println("Error creating/updating table: " + e.getMessage());
         }
     }
 

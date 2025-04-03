@@ -180,8 +180,7 @@ public class RegisterGUI extends JPanel {
                 // Check registration validity
                 if (validate(getUser, getEmail, getPass, getCPass)) {
                     //System.out.println("Valid Registration");
-                    MySQL.insertUser(getUser, getPass); // Create account into database
-                    MySQL.setEmail(getUser, getEmail); // Add email to account
+                    MySQL.insertUser(getUser, getPass, getEmail); // Create account into database with email
 
                     // Dialog box
                     JOptionPane.showMessageDialog(null, "Account Successfully Created. Please Log-in.", "", JOptionPane.INFORMATION_MESSAGE);
