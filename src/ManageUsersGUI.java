@@ -106,7 +106,7 @@ public class ManageUsersGUI extends JPanel {
         panel.add(userEmailError, gbc);
 
         // Enter email text (update email)
-        JLabel emailTxt = new JLabel("Enter Username");
+        JLabel emailTxt = new JLabel("Enter Email");
         emailTxt.setFont(new Font("SansSerif", Font.PLAIN, 12));
         gbc.gridy = 8;
         gbc.gridx = 0;

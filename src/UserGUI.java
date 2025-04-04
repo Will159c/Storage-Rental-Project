@@ -10,7 +10,6 @@ public class UserGUI extends JPanel {
     private JLabel titleTxt;
     private String username;
     private static ArrayList<Integer> storageIDs;
-    //private static ArrayList<Object> unitDetails = new ArrayList<Object>();
     private DefaultListModel<Object> listModel;
 
     public UserGUI(MyGUI myGUI, String username) {
