@@ -42,8 +42,8 @@ public class StorageGUI extends JPanel {
 
         // combo box for price sort options
         String[] priceOptions = {
-                "Sort by Price: Lowest to Highest",
-                "Sort by Price: Highest to Lowest"
+                "Price: Lowest to Highest",
+                "Price: Highest to Lowest"
         };
         JComboBox<String> priceSortCombo = new JComboBox<>(priceOptions);
         priceSortCombo.addActionListener(e -> {
@@ -56,8 +56,8 @@ public class StorageGUI extends JPanel {
 
         // combo box for size sort options
         String[] sizeOptions = {
-                "Sort by Size: Smallest to Biggest",
-                "Sort by Size: Biggest to Smallest"
+                "Size: Smallest to Biggest",
+                "Size: Biggest to Smallest"
         };
         JComboBox<String> sizeSortCombo = new JComboBox<>(sizeOptions);
         sizeSortCombo.addActionListener(e -> {
