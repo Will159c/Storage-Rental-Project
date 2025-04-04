@@ -106,6 +106,7 @@ public class LoginScreenGUI extends JPanel {
                     // Clear text fields
                     registerUserTxt.setText("");
                     passTxt.setText("");
+                    myGui.setUsername(getUser);
 
                     myGui.loginUser(getUser); // Redirect to User Screen by passing to MyGUI to save user info
                 }

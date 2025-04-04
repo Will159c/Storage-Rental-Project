@@ -367,7 +367,7 @@ public static boolean isUser(String username) { //returns true if the given stri
     }
 
     public static List<Integer> getUserReservations(int id_user) { //this takes a input of a user id and returns a list of storage id's that that user has reserved
-        String sql = "SELECT * FROM storage_reservations WHERE customer_name = ?";
+        String sql = "SELECT * FROM storage_reservations WHERE user_id = ?";
         List<Integer> storageID = new ArrayList<>();
 
         try (Connection conn = MySQL.getConnection();
@@ -534,4 +534,33 @@ public static boolean isUser(String username) { //returns true if the given stri
             throw new RuntimeException(e);
         }
     }
+    public static String getEmailByUsername(String username) {
+        String sql = "SELECT email FROM users WHERE userName = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, username);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) return rs.getString("email");
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
+    public static boolean isUnitReservedByUser(int storageID, String email) {
+        String query = "SELECT 1 FROM storage_reservations WHERE storage_id = ? AND customer_email = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, storageID);
+            stmt.setString(2, email);
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            System.err.println("Error checking reservation ownership: " + e.getMessage());
+            return false;
+        }
+    }
+
+
 }
+

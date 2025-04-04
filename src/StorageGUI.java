@@ -7,6 +7,10 @@ import java.util.Comparator;
 import javax.swing.text.PlainDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
+import org.jdatepicker.impl.*;
+import java.util.Properties;
+
+
 
 
 public class StorageGUI extends JPanel {
@@ -103,7 +107,7 @@ public class StorageGUI extends JPanel {
 
         // a back button that sends the user back to the welcome screen
         JButton backBtn = new JButton("Back");
-        backBtn.addActionListener(e -> myGui.showMain("Welcome Screen"));
+        backBtn.addActionListener(e -> myGui.loginUser(myGui.getUsername()));
         add(backBtn, BorderLayout.SOUTH);
 
         // directs the button to what it will execute
@@ -177,12 +181,31 @@ public class StorageGUI extends JPanel {
         unitPanel.setPreferredSize(new Dimension(120, 140));
         unitPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         unitPanel.setLayout(new GridBagLayout());
+        // update to check if storage is reserved by user
         unitPanel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                openReservationPanel(sd.getId());
+                int storageID = sd.getId();
+                boolean isReserved = sd.isReserved();
+                String username = myGui.getUsername();
+                String email = MySQL.getEmailByUsername(username);
+
+                if (isReserved) {
+                    if (MySQL.isUnitReservedByUser(storageID, email)) {
+                        openReservationPanel(storageID);
+                    } else {
+                        JOptionPane.showMessageDialog(null,
+                                "You don't have this unit reserved.",
+                                "Access Denied",
+                                JOptionPane.ERROR_MESSAGE);
+                    }
+                } else {
+                    openReservationPanel(storageID); // allow reservation
+                }
             }
         });
+
+
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -209,16 +232,17 @@ public class StorageGUI extends JPanel {
         JLabel title = new JLabel("Storage ID: " + storageID, SwingConstants.CENTER);
         panel.add(title, gbc);
 
+        String email = MySQL.getEmailByUsername(myGui.getUsername());
+
         gbc.gridy = 1;
-        gbc.gridwidth = 1;
         gbc.gridx = 0;
-        panel.add(new JLabel("Enter Email:"), gbc);
+        gbc.gridwidth = 1;
+        panel.add(new JLabel("Email:"), gbc);
 
         gbc.gridx = 1;
-        JTextField emailField = new JTextField(15);
-        panel.add(emailField, gbc);
+        panel.add(new JLabel(email), gbc);
 
-        gbc.gridy = 2;
+        gbc.gridy++; // <-- add this
         gbc.gridx = 0;
         panel.add(new JLabel("Enter Password:"), gbc);
 
@@ -226,63 +250,108 @@ public class StorageGUI extends JPanel {
         JPasswordField passwordField = new JPasswordField(15);
         panel.add(passwordField, gbc);
 
-        // Card Number
         JPasswordField cardField = new JPasswordField();
         if (!reserved) {
-            gbc.gridy = 3;
+            gbc.gridy++;
             gbc.gridx = 0;
             panel.add(new JLabel("Enter 16 Digit Card Number:"), gbc);
             gbc.gridx = 1;
-            // 16 digits only, no spaces
             cardField.setDocument(new PlainDocument() {
                 @Override
                 public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
                     if (str == null) return;
-
-                    // Only allow digits, max 16 characters, no spaces
                     if (str.matches("\\d+") && (getLength() + str.length() <= 16)) {
                         super.insertString(offs, str, a);
                     }
                 }
             });
-
             panel.add(cardField, gbc);
         }
 
         gbc.gridy = 4;
         gbc.gridx = 0;
         gbc.gridwidth = 2;
+
+
+        // Date pickers config
+        UtilDateModel startModel = new UtilDateModel();
+        UtilDateModel endModel = new UtilDateModel();
+        Properties props = new Properties();
+        props.put("text.month", "Month");
+        props.put("text.today", "Today");
+        props.put("text.year", "Year");
+
+        JDatePanelImpl startPanel = new JDatePanelImpl(startModel, props);
+        JDatePickerImpl startPicker = new JDatePickerImpl(startPanel, new DateLabelFormatter());
+
+        JDatePanelImpl endPanel = new JDatePanelImpl(endModel, props);
+        JDatePickerImpl endPicker = new JDatePickerImpl(endPanel, new DateLabelFormatter());
+
+        if(!reserved) {
+
+// Start Date
+            gbc.gridy++;
+            gbc.gridx = 0;
+            panel.add(new JLabel("Start Date:"), gbc);
+            gbc.gridx = 1;
+            panel.add(startPicker, gbc);
+
+// End Date
+            gbc.gridy++;
+            gbc.gridx = 0;
+            panel.add(new JLabel("End Date:"), gbc);
+            gbc.gridx = 1;
+            panel.add(endPicker, gbc);
+        }
+
         JButton actionButton = new JButton(reserved ? "Cancel Reservation" : "Reserve");
+
+
         actionButton.addActionListener(e -> {
-            String email = emailField.getText().trim();
             String password = new String(passwordField.getPassword()).trim();
             String cardNumber = new String(cardField.getPassword()).trim();
+            int userID = MySQL.getUserID(myGui.getUsername());
 
-            int userID = (myGui.getUsername() != null)
-                    ? MySQL.getUserID(myGui.getUsername())
-                    : MySQL.getUserIDByEmail(email);
+            Date startDate = null;
+            Date endDate = null;
 
-            if (email.isEmpty() || password.isEmpty()) return;
+            if (!reserved) {
+                startDate = (Date) startPicker.getModel().getValue();
+                endDate = (Date) endPicker.getModel().getValue();
 
-            if (reserved) {
-                MySQL.cancelReservation(storageID, email, password);
-                JOptionPane.showMessageDialog(null, "Reservation canceled!", "Success", JOptionPane.INFORMATION_MESSAGE);
-            } else {
+                if (startDate == null) {
+                    JOptionPane.showMessageDialog(null, "Start date is required", "Date Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                if (endDate != null && !endDate.after(startDate)) {
+                    JOptionPane.showMessageDialog(null, "End date must be after start date", "Date Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
                 if (!cardNumber.matches("\\d{16}")) {
                     JOptionPane.showMessageDialog(null, "Please enter a valid 16-digit card number", "Invalid Card", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-                MySQL.reserveStorageUnit(storageID, email, userID, password);
-                JOptionPane.showMessageDialog(null, "Reservation successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
             }
 
-            allUnits = MySQL.getAllStorageDetails();  // Refresh units
-            myGui.showMain("Storage Screen");
+            if (password.isEmpty()) return;
 
+            if (reserved) {
+                MySQL.cancelReservation(storageID, email, password);
+                JOptionPane.showMessageDialog(null, "Reservation canceled!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                myGui.loginUser(myGui.getUsername());
+            } else {
+                MySQL.reserveStorageUnit(storageID, email, userID, password);
+                JOptionPane.showMessageDialog(null, "Reservation successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                myGui.loginUser(myGui.getUsername());
+            }
+
+            allUnits = MySQL.getAllStorageDetails();
         });
+
+        gbc.gridy++;
         panel.add(actionButton, gbc);
 
-        gbc.gridy = 5;
+        gbc.gridy++;
         JButton backButton = new JButton("Back");
         backButton.addActionListener(e -> myGui.showMain("Storage Screen"));
         panel.add(backButton, gbc);
