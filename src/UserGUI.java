@@ -156,11 +156,12 @@ public class UserGUI extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (currStorage[0] == null) {
-                    cancelError.setText("Please a Storage Unit");
+                    cancelError.setText("Please choose a Storage Unit");
                 }
                 else {
                     cancelError.setText("");
-                    System.out.println(currStorage[0]);
+
+                    myGui.toCancellation(username, currStorage[0]);
                 }
             }
         });

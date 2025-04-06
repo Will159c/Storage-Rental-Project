@@ -11,6 +11,7 @@ public class MyGUI {
     private static CardLayout cardLayout;
     private String username;
     private UserGUI userGUI; // make userGUI be a private attribute to be able to invoke it elsewhere
+    private CancelGUI cancelGUI;
 
     public MyGUI() {
         /////////////// Initial GUI Settings /////////////
@@ -110,6 +111,12 @@ public class MyGUI {
 
         // Switch the User GUI
         cardLayout.show(cardpanel, "User Screen");
+    }
+
+    public void toCancellation(String user, int id) {
+        cancelGUI = new CancelGUI(this, user, id);
+        cardpanel.add(cancelGUI, "Cancel Reservation");
+        cardLayout.show(cardpanel, "Cancel Reservation");
     }
 
 }
