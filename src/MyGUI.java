@@ -84,15 +84,6 @@ public class MyGUI {
         // Login button action
         loginButton.addActionListener(e -> showMain("Login"));
 
-        // Temp test button
-        JButton storageButton = new JButton("Test Storage Functions");
-        storageButton.setPreferredSize(new Dimension(180, 50));
-        gbc.gridy = 3; // Move button to next row
-        gbc.insets = new Insets(20, 0, 10, 0); // Add spacing in between buttons and labels
-        panel.add(storageButton, gbc);
-        storageButton.addActionListener(e -> showMain("Storage Screen"));
-
-
         return panel;
     }
 
