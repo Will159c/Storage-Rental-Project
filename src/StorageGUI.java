@@ -42,7 +42,7 @@ public class StorageGUI extends JPanel {
 
         // combo box for price sort options
         String[] priceOptions = {
-                "Price: Lowest to Highest",
+                "Price: Lowest to Highest" ,
                 "Price: Highest to Lowest"
         };
         JComboBox<String> priceSortCombo = new JComboBox<>(priceOptions);
@@ -181,7 +181,39 @@ public class StorageGUI extends JPanel {
         unitPanel.setPreferredSize(new Dimension(120, 140));
         unitPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         unitPanel.setLayout(new GridBagLayout());
-        // update to check if storage is reserved by user
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+
+        // Add basic details
+        unitPanel.add(new JLabel("ID: " + sd.getId()), gbc);
+        gbc.gridy++;
+        unitPanel.add(new JLabel("Size: " + sd.getSize()), gbc);
+        gbc.gridy++;
+        unitPanel.add(new JLabel("Price: $" + sd.getPrice()), gbc);
+        gbc.gridy++;
+        unitPanel.add(new JLabel("Location: " + sd.getLocation()), gbc);
+
+        // Check reservation status and add indicator
+        if (sd.isReserved()) {
+            String currentUserEmail = MySQL.getEmailByUsername(myGui.getUsername());
+            JLabel reservedLabel = new JLabel();
+            if (MySQL.isUnitReservedByUser(sd.getId(), currentUserEmail)) {
+                // Reserved by logged in user: use light green
+                unitPanel.setBackground(new Color(144, 238, 144)); // light green
+                reservedLabel.setText("Reserved by you");
+                reservedLabel.setForeground(Color.GREEN.darker());
+            } else {
+                // Reserved by someone else: use light red
+                unitPanel.setBackground(new Color(255, 182, 193)); // light red
+                reservedLabel.setText("Reserved");
+                reservedLabel.setForeground(Color.RED);
+            }
+            gbc.gridy++;
+            unitPanel.add(reservedLabel, gbc);
+        }
+
+        // Mouse listener remains unchanged
         unitPanel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -204,20 +236,9 @@ public class StorageGUI extends JPanel {
                 }
             }
         });
-
-
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        unitPanel.add(new JLabel("ID: " + sd.getId()), gbc);
-        gbc.gridy++;
-        unitPanel.add(new JLabel("Size: " + sd.getSize()), gbc);
-        gbc.gridy++;
-        unitPanel.add(new JLabel("Price: $" + sd.getPrice()), gbc);
-        gbc.gridy++;
-        unitPanel.add(new JLabel("Location: " + sd.getLocation()), gbc);
         return unitPanel;
     }
+
 
     private void openReservationPanel(int storageID) {
         boolean reserved = MySQL.isUnitReserved(storageID);

@@ -9,7 +9,7 @@ import java.net.URL;
 public class MySQL {
     private static final String URL = "jdbc:mysql://caboose.proxy.rlwy.net:54157/railway";
     private static final String USER = "root";
-    private static final String PASSWORD = "OaWunWeWjnACHWrhVxwAIQJVZPtotFuD"; // Replace with actual password
+    private static final String PASSWORD = "eplace Here"; // Replace with actual password
 
     private static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(URL, USER, PASSWORD);
