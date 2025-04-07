@@ -11,6 +11,7 @@ public class MyGUI {
     private static CardLayout cardLayout;
     private String username;
     private UserGUI userGUI; // make userGUI be a private attribute to be able to invoke it elsewhere
+    private CancelGUI cancelGUI;
 
     public MyGUI() {
         /////////////// Initial GUI Settings /////////////
@@ -84,15 +85,6 @@ public class MyGUI {
         // Login button action
         loginButton.addActionListener(e -> showMain("Login"));
 
-        // Temp test button
-        JButton storageButton = new JButton("Test Storage Functions");
-        storageButton.setPreferredSize(new Dimension(180, 50));
-        gbc.gridy = 3; // Move button to next row
-        gbc.insets = new Insets(20, 0, 10, 0); // Add spacing in between buttons and labels
-        panel.add(storageButton, gbc);
-        storageButton.addActionListener(e -> showMain("Storage Screen"));
-
-
         return panel;
     }
 
@@ -119,6 +111,12 @@ public class MyGUI {
 
         // Switch the User GUI
         cardLayout.show(cardpanel, "User Screen");
+    }
+
+    public void toCancellation(String user, int id) {
+        cancelGUI = new CancelGUI(this, user, id);
+        cardpanel.add(cancelGUI, "Cancel Reservation");
+        cardLayout.show(cardpanel, "Cancel Reservation");
     }
 
 }
