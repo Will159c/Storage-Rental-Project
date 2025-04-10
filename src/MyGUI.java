@@ -49,7 +49,7 @@ public class MyGUI {
 
     private JPanel welcomeScreen() {
         ///////////// Initial Settings ///////////
-        JPanel panel = new JPanel(new GridBagLayout());
+        JPanel panel = new BackgroundSetter("/background.jpg", new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints(); // Allows for ordered positioning
 
         ///////////// Text ///////////
@@ -57,6 +57,10 @@ public class MyGUI {
         // Title text
         titleTxt = new JLabel("Welcome to Sotrage Rental", SwingConstants.CENTER);
         titleTxt.setFont(new Font("SansSerif", Font.BOLD, 40));
+        titleTxt.setOpaque(true); // Allow for background of border to be colored
+        titleTxt.setBackground(Color.BLACK); // Set background border color
+        titleTxt.setForeground(Color.WHITE); // Set text color
+        titleTxt.setBorder(BorderFactory.createLineBorder(Color.pink)); // Create the border
         titleTxt.setMinimumSize(new Dimension(400, 400));
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -84,7 +88,6 @@ public class MyGUI {
 
         // Login button action
         loginButton.addActionListener(e -> showMain("Login"));
-
         return panel;
     }
 
