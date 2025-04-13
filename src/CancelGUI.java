@@ -8,7 +8,6 @@ public class CancelGUI extends JPanel {
     private MyGUI myGui;
     private String username;
     private int id;
-
     public CancelGUI(MyGUI myGUI, String username, int id) {
         this.myGui = myGUI;
         this.username = username;
@@ -40,10 +39,12 @@ public class CancelGUI extends JPanel {
         panel.add(emailTxt, gbc);
 
         // Email text field
-        JTextField emailFieldTxt = new JTextField(15);
+        String email = MySQL.getEmailByUsername(username);
+        JLabel emailLabel = new JLabel(email);
+        panel.add(emailLabel, gbc);
         gbc.gridx = 1;
         gbc.anchor = GridBagConstraints.WEST;
-        panel.add(emailFieldTxt, gbc);
+        panel.add(emailLabel, gbc);
 
         // Credentials validation message
         JLabel credentialsValid = new JLabel("");
@@ -98,7 +99,7 @@ public class CancelGUI extends JPanel {
         cButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String email = emailFieldTxt.getText();
+                String email = emailLabel.getText();
                 String password = String.valueOf(passTxt.getPassword());
                 if (cancelValidation(username, email, password)) {
                     credentialsValid.setText("");
@@ -107,6 +108,7 @@ public class CancelGUI extends JPanel {
 
                     // Cancel reservation
                     MySQL.cancelReservation(id, email, password);
+
                     myGui.loginUser(username);
                 }
                 else {

@@ -116,6 +116,7 @@ public class StorageGUI extends JPanel {
     }
 
     private void showAllUnits() {
+        allUnits = MySQL.getAllStorageDetails();
         squaresPanel.removeAll();
         for (MySQL.StorageDetails sd : allUnits) {
             squaresPanel.add(createStorageSquare(sd));
@@ -123,6 +124,8 @@ public class StorageGUI extends JPanel {
         squaresPanel.revalidate();
         squaresPanel.repaint();
     }
+
+
 
     private void showAvailableUnits() {
         squaresPanel.removeAll();
@@ -134,6 +137,7 @@ public class StorageGUI extends JPanel {
         squaresPanel.revalidate();
         squaresPanel.repaint();
     }
+
 
     private void showUnitsSortedByPrice(boolean ascending) {
         squaresPanel.removeAll();
@@ -239,7 +243,6 @@ public class StorageGUI extends JPanel {
         return unitPanel;
     }
 
-
     private void openReservationPanel(int storageID) {
         boolean reserved = MySQL.isUnitReserved(storageID);
         JPanel panel = new JPanel(new GridBagLayout());
@@ -334,17 +337,26 @@ public class StorageGUI extends JPanel {
             int userID = MySQL.getUserID(myGui.getUsername());
 
             Date startDate = null;
-            Date endDate = null;
+            Date userEndDate = null;
+
+            if (password.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Password is required.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (!MySQL.isUsernameAndPassword(myGui.getUsername(), password)) {
+                JOptionPane.showMessageDialog(null, "Incorrect password.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
             if (!reserved) {
                 startDate = (Date) startPicker.getModel().getValue();
-                endDate = (Date) endPicker.getModel().getValue();
+                userEndDate = (Date) endPicker.getModel().getValue();
 
                 if (startDate == null) {
                     JOptionPane.showMessageDialog(null, "Start date is required", "Date Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-                if (endDate != null && !endDate.after(startDate)) {
+                if (userEndDate != null && !userEndDate.after(startDate)) {
                     JOptionPane.showMessageDialog(null, "End date must be after start date", "Date Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
@@ -354,20 +366,30 @@ public class StorageGUI extends JPanel {
                 }
             }
 
-            if (password.isEmpty()) return;
-
             if (reserved) {
                 MySQL.cancelReservation(storageID, email, password);
                 JOptionPane.showMessageDialog(null, "Reservation canceled!", "Success", JOptionPane.INFORMATION_MESSAGE);
-                myGui.loginUser(myGui.getUsername());
-            } else {
-                MySQL.reserveStorageUnit(storageID, email, userID, password);
+
+                allUnits = MySQL.getAllStorageDetails(); // refresh storage units
+                showAllUnits(); // re-render updated units
+                myGui.showMain("Storage Screen"); // go back
+            }
+            else {
+                Calendar c = Calendar.getInstance();
+                c.setTime(startDate);
+                c.add(Calendar.DATE, 30);
+                Date billingEndDate = c.getTime();
+
+                MySQL.reserveStorageUnit(storageID, email, userID, password, startDate, billingEndDate);
+                EmailNotifier.sendReservationConfirmation(email, storageID, startDate, userEndDate);
                 JOptionPane.showMessageDialog(null, "Reservation successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                allUnits = MySQL.getAllStorageDetails();
                 myGui.loginUser(myGui.getUsername());
             }
-
-            allUnits = MySQL.getAllStorageDetails();
         });
+
+
+
 
         gbc.gridy++;
         panel.add(actionButton, gbc);

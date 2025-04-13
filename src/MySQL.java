@@ -5,11 +5,14 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.net.URL;
+import java.sql.SQLException;
+import java.util.Date;
+
 
 public class MySQL {
     private static final String URL = "jdbc:mysql://caboose.proxy.rlwy.net:54157/railway";
     private static final String USER = "root";
-    private static final String PASSWORD = "eplace Here"; // Replace with actual password
+    private static final String PASSWORD = "OaWunWeWjnACHWrhVxwAIQJVZPtotFuD"; // Replace with actual password
 
     private static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(URL, USER, PASSWORD);
@@ -406,16 +409,14 @@ public static boolean isUser(String username) { //returns true if the given stri
 
     }
 
-    public static boolean reserveStorageUnit(int storageID, String email, int id_user, String password) { //this reserves a unit with the related inputs
-        // Verify user exists and credentials are correct
+    public static boolean reserveStorageUnit(int storageID, String email, int id_user, String password, Date startDate, Date endDate) {
         if (!isEmailAndPasswordValid(email, password)) {
             System.out.println("Invalid email or password.");
             return false;
         }
 
         String checkAvailability = "SELECT * FROM storage_reservations WHERE storage_id = ?";
-        String reserveUnit = "INSERT INTO storage_reservations (storage_id, customer_email, user_id) VALUES (?, ?, ?)";
-
+        String reserveUnit = "INSERT INTO storage_reservations (storage_id, customer_email, user_id, start_date, end_date) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = getConnection();
              PreparedStatement checkStmt = conn.prepareStatement(checkAvailability);
@@ -430,12 +431,10 @@ public static boolean isUser(String username) { //returns true if the given stri
                 reserveStmt.setInt(1, storageID);
                 reserveStmt.setString(2, email);
                 reserveStmt.setInt(3, id_user);
-                if (reserveStmt.executeUpdate() > 0) {
-                    // Send email notification
-                    EmailNotifier.sendEmail(email, "Storage Unit Reserved",
-                            "Your storage unit (ID: " + storageID + ") has been successfully reserved.");
+                reserveStmt.setDate(4, new java.sql.Date(startDate.getTime()));
+                reserveStmt.setDate(5, new java.sql.Date(endDate.getTime()));
 
-                    // Notify the admin
+                if (reserveStmt.executeUpdate() > 0) {
                     EmailNotifier.sendEmail("storagerentalproject@gmail.com", "New Reservation",
                             "A new storage unit (ID: " + storageID + ") has been reserved.");
                     return true;
@@ -449,8 +448,10 @@ public static boolean isUser(String username) { //returns true if the given stri
         }
     }
 
+
+
+
     public static boolean cancelReservation(int storageID, String email, String password) {
-        // Verify user exists and credentials are correct
         if (!isEmailAndPasswordValid(email, password)) {
             System.out.println("Invalid email or password.");
             return false;
@@ -466,14 +467,9 @@ public static boolean isUser(String username) { //returns true if the given stri
             int rowsAffected = stmt.executeUpdate();
 
             if (rowsAffected > 0) {
-                // Notify the user that their reservation was canceled
-                EmailNotifier.sendEmail(email, "Reservation Canceled",
-                        "Your reservation for storage unit (ID: " + storageID + ") has been canceled.");
-
-                // Notify the admin
+                EmailNotifier.sendCancellationConfirmation(email, storageID);
                 EmailNotifier.sendEmail("storagerentalproject@gmail.com", "Reservation Canceled",
                         "The reservation for storage unit (ID: " + storageID + ") has been canceled by " + email + ".");
-
                 return true;
             } else {
                 System.out.println("No reservation found to cancel.");
@@ -485,8 +481,6 @@ public static boolean isUser(String username) { //returns true if the given stri
             return false;
         }
     }
-
-
 
     public static boolean isUnitReserved(int storageID) {
         String query = "SELECT EXISTS (SELECT 1 FROM storage_reservations WHERE storage_id = ?)";

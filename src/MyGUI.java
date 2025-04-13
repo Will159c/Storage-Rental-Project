@@ -109,8 +109,11 @@ public class MyGUI {
 
     public void loginUser(String user) { // Allow for information to be passed after login
         // Set the information ready for User GUI
+        this.username = user;
         userGUI = new UserGUI(this, user);
+        StorageGUI storageScreen = new StorageGUI(this);
         cardpanel.add(userGUI, "User Screen");
+        cardpanel.add(storageScreen, "Storage Screen");
 
         // Switch the User GUI
         cardLayout.show(cardpanel, "User Screen");

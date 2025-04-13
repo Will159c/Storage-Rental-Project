@@ -1,6 +1,10 @@
 import javax.mail.*;
 import javax.mail.internet.*;
 import java.util.Properties;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Calendar;
+
 
 public class EmailNotifier {
     private static final String SMTP_HOST = "smtp.gmail.com";
@@ -10,15 +14,13 @@ public class EmailNotifier {
 
     public static void sendEmail(String recipient, String subject, String body) {
         if (recipient == null || recipient.trim().isEmpty()) {
-            System.err.println(" Error: Recipient email is null or empty. Email not sent.");
+            System.err.println("Error: Recipient email is null or empty. Email not sent.");
             return;
         }
-
         if (EMAIL_USER == null || EMAIL_PASS == null) {
-            System.err.println(" Error: Email credentials are missing. Check environment variables.");
+            System.err.println("Error: Email credentials are missing. Check environment variables.");
             return;
         }
-
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
@@ -39,9 +41,71 @@ public class EmailNotifier {
             message.setText(body);
 
             Transport.send(message);
-            System.out.println(" Email sent to: " + recipient);
+            System.out.println("Email sent to: " + recipient);
         } catch (MessagingException e) {
-            System.err.println(" Failed to send email: " + e.getMessage());
+            System.err.println("Failed to send email: " + e.getMessage());
         }
+    }
+
+    public static void sendReservationConfirmation(String recipient, int unitId, Date startDate, Date realEndDate) {
+        var details = MySQL.getStorageInformation(unitId);
+        if (details.isEmpty()) {
+            System.err.println("Failed to fetch unit info.");
+            return;
+        }
+        int pricePerMonth = (Integer) details.get(2);
+        String size = (String) details.get(1);
+        String location = (String) details.get(3);
+
+        SimpleDateFormat fmt = new SimpleDateFormat("MM-dd-yyyy");
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(startDate);
+        cal.add(Calendar.DATE, 30);
+        Date billingEndDate = cal.getTime();
+
+        StringBuilder body = new StringBuilder();
+        body.append("Reservation Confirmed!\n\n")
+                .append("Storage Unit ID: ").append(unitId).append("\n")
+                .append("Size: ").append(size).append("\n")
+                .append("Price per Month: $").append(pricePerMonth).append("\n")
+                .append("Location: ").append(location).append("\n\n")
+                .append("Start Date: ").append(fmt.format(startDate)).append("\n");
+
+        if (realEndDate != null) {
+            body.append("End Date: ").append(fmt.format(realEndDate)).append("\n");
+        }
+
+        body.append("\nBilling Statement:\n")
+                .append("Rental Period: ").append(fmt.format(startDate))
+                .append(" - ").append(fmt.format(billingEndDate)).append("\n")
+                .append("Total for this period: $").append(pricePerMonth).append("\n\n")
+                .append("Thank you for choosing us!");
+
+        sendEmail(recipient, "Storage Reservation Confirmed", body.toString());
+    }
+
+
+    public static void sendCancellationConfirmation(String recipient, int unitId) {
+        var details = MySQL.getStorageInformation(unitId);
+        if (details.isEmpty()) {
+            System.err.println("Failed to fetch unit info.");
+            return;
+        }
+        String size = (String) details.get(1);
+        int price = (Integer) details.get(2);
+        String location = (String) details.get(3);
+
+        String body = String.format(
+                "Reservation Cancelled.\n\n" +
+                        "Storage Unit ID: %d\n" +
+                        "Size: %s\n" +
+                        "Price per Month: $%d\n" +
+                        "Location: %s\n\n" +
+                        "We hope to serve you again!",
+                unitId, size, price, location
+        );
+
+        sendEmail(recipient, "Storage Reservation Cancelled", body);
     }
 }
