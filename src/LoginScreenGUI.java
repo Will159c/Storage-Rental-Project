@@ -9,12 +9,17 @@ public class LoginScreenGUI extends JPanel {
 
     public LoginScreenGUI(MyGUI myGui) {
         this.myGui = myGui; // Save reference
-        setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints(); // Allows for ordered positioning
+        setLayout(new BorderLayout());
 
         // Create a panel with GridBagLayout
-        JPanel panel = new JPanel(new GridBagLayout());
-        gbc.fill = GridBagConstraints.HORIZONTAL; // Stretch components horizontally
+        JPanel panel = new BackgroundSetter("/background_blur.jpg", new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints(); // Allows for ordered positioning
+
+        // Initial settings
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.insets = new Insets(10, 0, 10, 0);
+        gbc.anchor = GridBagConstraints.CENTER;
 
         // Title text
         JLabel titleTxt = new JLabel("Log-in", SwingConstants.CENTER);
@@ -30,6 +35,10 @@ public class LoginScreenGUI extends JPanel {
         // Username label
         JLabel userNameTxt = new JLabel("Enter Username:");
         userNameTxt.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        userNameTxt.setOpaque(true); // Allow for background of border to be colored
+        userNameTxt.setBackground(Color.BLACK); // Set background border color
+        userNameTxt.setForeground(Color.WHITE); // Set text color
+        userNameTxt.setBorder(BorderFactory.createLineBorder(Color.pink)); // Create the border
         gbc.gridy = 1;
         gbc.insets = new Insets(20, 15, 5, 0);
         gbc.anchor = GridBagConstraints.EAST;
@@ -44,7 +53,10 @@ public class LoginScreenGUI extends JPanel {
         // Username validation message
         JLabel userValid = new JLabel("");
         userValid.setFont(new Font("SansSerif", Font.ITALIC, 10));
-        userValid.setForeground(Color.red);
+        userValid.setOpaque(true); // Allow for background of border to be colored
+        userValid.setBackground(Color.BLACK); // Set background border color
+        userValid.setForeground(Color.red); // Set text color
+        userValid.setBorder(BorderFactory.createLineBorder(Color.pink)); // Create the border
         gbc.gridy = 2;
         gbc.gridx = 1;
         gbc.insets = new Insets(0, 40, 5, 0);
@@ -53,6 +65,10 @@ public class LoginScreenGUI extends JPanel {
         // Password label
         JLabel passLabel = new JLabel("Enter Password:");
         passLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        passLabel.setOpaque(true); // Allow for background of border to be colored
+        passLabel.setBackground(Color.BLACK); // Set background border color
+        passLabel.setForeground(Color.WHITE); // Set text color
+        passLabel.setBorder(BorderFactory.createLineBorder(Color.pink)); // Create the border
         gbc.gridy = 3;
         gbc.gridx = 0;
         gbc.insets = new Insets(20, 15, 5, 0);
@@ -117,6 +133,6 @@ public class LoginScreenGUI extends JPanel {
         });
 
         // Add panel to LoginScreenGUI
-        add(panel);
+        add(panel, BorderLayout.CENTER);
     }
 }

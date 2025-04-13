@@ -9,12 +9,17 @@ public class RegisterGUI extends JPanel {
 
     public RegisterGUI(MyGUI myGui) {
         this.myGui = myGui;
-        setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints(); // Allows for ordered positioning
+        setLayout(new BorderLayout());
 
         // Create a panel with GridBagLayout
-        JPanel panel = new JPanel(new GridBagLayout());
-        gbc.fill = GridBagConstraints.HORIZONTAL; // Stretch components horizontally
+        JPanel panel = new BackgroundSetter("/background_blur.jpg", new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints(); // Allows for ordered positioning
+
+        // Initial settings
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.insets = new Insets(10, 0, 10, 0);
+        gbc.anchor = GridBagConstraints.CENTER;
 
         // Register Text
         JLabel registerTitle = new JLabel("Registration", SwingConstants.CENTER);
@@ -33,6 +38,10 @@ public class RegisterGUI extends JPanel {
         // Username text
         JLabel userNameTxt = new JLabel("Enter Username");
         userNameTxt.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        userNameTxt.setOpaque(true); // Allow for background of border to be colored
+        userNameTxt.setBackground(Color.BLACK); // Set background border color
+        userNameTxt.setForeground(Color.WHITE); // Set text color
+        userNameTxt.setBorder(BorderFactory.createLineBorder(Color.pink)); // Create the border
         gbc.gridy = 1;
         gbc.insets = new Insets(20, 15, 5, 0); // Add spacing
         gbc.anchor = GridBagConstraints.EAST; // Keep this to the left
@@ -48,7 +57,10 @@ public class RegisterGUI extends JPanel {
         // Confirm username is valid
         JLabel userValid = new JLabel("");
         userValid.setFont(new Font("SansSerif", Font.ITALIC, 10));
+        userValid.setOpaque(true);
+        userValid.setBackground(Color.BLACK); // Set background border color
         userValid.setForeground(Color.red);
+        userValid.setBorder(BorderFactory.createLineBorder(Color.pink));
         gbc.gridy = 2;
         gbc.gridx = 1;
         gbc.insets = new Insets(0, 40, 5, 0);
@@ -59,6 +71,10 @@ public class RegisterGUI extends JPanel {
         // Email text
         JLabel emailLabel = new JLabel("Enter email");
         emailLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        emailLabel.setOpaque(true); // Allow for background of border to be colored
+        emailLabel.setBackground(Color.BLACK); // Set background border color
+        emailLabel.setForeground(Color.WHITE); // Set text color
+        emailLabel.setBorder(BorderFactory.createLineBorder(Color.pink)); // Create the border
         gbc.gridy = 3;
         gbc.gridx = 0;
         gbc.insets = new Insets(20, 15, 5, 0); // Add spacing
@@ -75,7 +91,10 @@ public class RegisterGUI extends JPanel {
         // Confirm email is valid
         JLabel emailValid = new JLabel("");
         emailValid.setFont(new Font("SansSerif", Font.ITALIC, 10));
-        emailValid.setForeground(Color.red);
+        emailValid.setOpaque(true); // Allow for background of border to be colored
+        emailValid.setBackground(Color.BLACK); // Set background border color
+        emailValid.setForeground(Color.red); // Set text color
+        emailValid.setBorder(BorderFactory.createLineBorder(Color.pink)); // Create the border
         gbc.gridy = 4;
         gbc.gridx = 1;
         gbc.insets = new Insets(0, 40, 5, 0);
@@ -86,6 +105,10 @@ public class RegisterGUI extends JPanel {
         // Password text
         JLabel passLabel = new JLabel("Enter password");
         passLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        passLabel.setOpaque(true); // Allow for background of border to be colored
+        passLabel.setBackground(Color.BLACK); // Set background border color
+        passLabel.setForeground(Color.WHITE); // Set text color
+        passLabel.setBorder(BorderFactory.createLineBorder(Color.pink)); // Create the border
         gbc.gridy = 5;
         gbc.gridx = 0;
         gbc.insets = new Insets(20, 15, 5, 0); // Add spacing
@@ -102,7 +125,10 @@ public class RegisterGUI extends JPanel {
         // Confirm password is valid
         JLabel passValid = new JLabel("");
         passValid.setFont(new Font("SansSerif", Font.ITALIC, 10));
-        passValid.setForeground(Color.red);
+        passValid.setOpaque(true); // Allow for background of border to be colored
+        passValid.setBackground(Color.BLACK); // Set background border color
+        passValid.setForeground(Color.red); // Set text color
+        passValid.setBorder(BorderFactory.createLineBorder(Color.pink)); // Create the border
         gbc.gridy = 6;
         gbc.gridx = 1;
         gbc.insets = new Insets(0, 0, 5, 0);
@@ -113,6 +139,10 @@ public class RegisterGUI extends JPanel {
         // Confirm Password text
         JLabel cpassLabel = new JLabel("Confirm password");
         cpassLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        cpassLabel.setOpaque(true); // Allow for background of border to be colored
+        cpassLabel.setBackground(Color.BLACK); // Set background border color
+        cpassLabel.setForeground(Color.WHITE); // Set text color
+        cpassLabel.setBorder(BorderFactory.createLineBorder(Color.pink)); // Create the border
         gbc.gridy = 7;
         gbc.gridx = 0;
         gbc.insets = new Insets(20, 15, 5, 0); // Add spacing
@@ -129,7 +159,10 @@ public class RegisterGUI extends JPanel {
         // Confirm password confirmation is valid
         JLabel cpassValid = new JLabel("");
         cpassValid.setFont(new Font("SansSerif", Font.ITALIC, 10));
-        cpassValid.setForeground(Color.red);
+        cpassValid.setOpaque(true); // Allow for background of border to be colored
+        cpassValid.setBackground(Color.BLACK); // Set background border color
+        cpassValid.setForeground(Color.red); // Set text color
+        cpassValid.setBorder(BorderFactory.createLineBorder(Color.pink)); // Create the border
         gbc.gridy = 8;
         gbc.gridx = 1;
         gbc.insets = new Insets(0, 40, 5, 0);
@@ -214,7 +247,7 @@ public class RegisterGUI extends JPanel {
             }
         });
 
-        add(panel);
+        add(panel, BorderLayout.CENTER);
     }
 
     public static boolean validate(String userTxt, String emailTxt, String password, String cPassword) {
