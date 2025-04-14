@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
 
 public class AdminGUI extends JPanel {
     private MyGUI myGui;
@@ -61,4 +62,21 @@ public class AdminGUI extends JPanel {
         // Add panel to AdminGUI
         add(panel);
     }
+
+    public static int getRevenue() {  // Gets the current revenue generated altogether.
+        List<Integer> x = MySQL.getReservationRevenueInfo();
+        int totalRevenue = 0;
+
+        for (int i = 0; i < x.size(); i += 2) {
+            int months = x.get(i);
+            int pricePerMonth = x.get(i + 1);
+
+            if (months < 0) months = 0; // safety check
+
+            totalRevenue += months * pricePerMonth;
+        }
+
+        return totalRevenue;
+    }
+
 }

@@ -56,7 +56,7 @@ public class MyGUI {
         ///////////// Text ///////////
 
         // Title text
-        titleTxt = new JLabel("Welcome to Sotrage Rental", SwingConstants.CENTER);
+        titleTxt = new JLabel("Welcome to Storage Rental", SwingConstants.CENTER);
         titleTxt.setFont(new Font("SansSerif", Font.BOLD, 40));
         titleTxt.setOpaque(true); // Allow for background of border to be colored
         titleTxt.setBackground(Color.BLACK); // Set background border color

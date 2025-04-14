@@ -9,6 +9,5 @@ public class Main {
 
         MyGUI myGUI = new MyGUI();
 
-
     }
 }

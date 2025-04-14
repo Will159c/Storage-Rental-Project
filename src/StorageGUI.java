@@ -257,6 +257,7 @@ public class StorageGUI extends JPanel {
         panel.add(title, gbc);
 
         String email = MySQL.getEmailByUsername(myGui.getUsername());
+        int price = MySQL.getPrice(storageID);
 
         gbc.gridy = 1;
         gbc.gridx = 0;
@@ -380,7 +381,7 @@ public class StorageGUI extends JPanel {
                 c.add(Calendar.DATE, 30);
                 Date billingEndDate = c.getTime();
 
-                MySQL.reserveStorageUnit(storageID, email, userID, password, startDate, billingEndDate);
+                MySQL.reserveStorageUnit(storageID, email, userID, password, startDate, billingEndDate, price);
                 EmailNotifier.sendReservationConfirmation(email, storageID, startDate, userEndDate);
                 JOptionPane.showMessageDialog(null, "Reservation successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
                 allUnits = MySQL.getAllStorageDetails();

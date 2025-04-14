@@ -1,8 +1,10 @@
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.nio.charset.StandardCharsets;
 import java.sql.*;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.net.URL;
 import java.sql.SQLException;
@@ -35,12 +37,27 @@ public class MySQL {
             this.reserved = reserved;
         }
 
-        public int getId() { return id; }
-        public String getSize() { return size; }
-        public int getPrice() { return price; }
-        public String getLocation() { return location; }
-        public boolean isReserved() { return reserved; }
+        public int getId() {
+            return id;
+        }
+
+        public String getSize() {
+            return size;
+        }
+
+        public int getPrice() {
+            return price;
+        }
+
+        public String getLocation() {
+            return location;
+        }
+
+        public boolean isReserved() {
+            return reserved;
+        }
     }
+
     // get info of the storages in one function
     public static List<StorageDetails> getAllStorageDetails() {
         String sql = "SELECT s.id, s.size, s.price, s.location, r.storage_id AS reserved " +
@@ -68,7 +85,7 @@ public class MySQL {
         return allUnits;
     }
 
-public static boolean isUser(String username) { //returns true if the given string username already exists
+    public static boolean isUser(String username) { //returns true if the given string username already exists
         String checkIfUsernameExists = "SELECT EXISTS (SELECT 1 FROM users WHERE username = ?)";
 
         try (Connection conn = MySQL.getConnection();
@@ -246,7 +263,7 @@ public static boolean isUser(String username) { //returns true if the given stri
 
     public static void setEmail(String username, String email) { //checks if the given email already is connected, if not it connects the email to the given user overriding information aswell
         String sql = "UPDATE users SET email = ? WHERE username = ?";
-        if(isEmail(email)) {
+        if (isEmail(email)) {
             System.out.println("Error, email already exists.");
             return;
         }
@@ -257,7 +274,7 @@ public static boolean isUser(String username) { //returns true if the given stri
             stmt.setString(2, username);
             stmt.executeUpdate();
 
-        } catch (SQLException e){
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
 
@@ -364,7 +381,7 @@ public static boolean isUser(String username) { //returns true if the given stri
             stmt.setInt(2, id);
             stmt.executeUpdate();
 
-        } catch (SQLException e){
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
@@ -409,14 +426,14 @@ public static boolean isUser(String username) { //returns true if the given stri
 
     }
 
-    public static boolean reserveStorageUnit(int storageID, String email, int id_user, String password, Date startDate, Date endDate) {
+    public static boolean reserveStorageUnit(int storageID, String email, int id_user, String password, Date startDate, Date endDate, int price) {
         if (!isEmailAndPasswordValid(email, password)) {
             System.out.println("Invalid email or password.");
             return false;
         }
 
         String checkAvailability = "SELECT * FROM storage_reservations WHERE storage_id = ?";
-        String reserveUnit = "INSERT INTO storage_reservations (storage_id, customer_email, user_id, start_date, end_date) VALUES (?, ?, ?, ?, ?)";
+        String reserveUnit = "INSERT INTO storage_reservations (storage_id, customer_email, user_id, start_date, end_date, price) VALUES (?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = getConnection();
              PreparedStatement checkStmt = conn.prepareStatement(checkAvailability);
@@ -433,6 +450,7 @@ public static boolean isUser(String username) { //returns true if the given stri
                 reserveStmt.setInt(3, id_user);
                 reserveStmt.setDate(4, new java.sql.Date(startDate.getTime()));
                 reserveStmt.setDate(5, new java.sql.Date(endDate.getTime()));
+                reserveStmt.setInt(6, price);
 
                 if (reserveStmt.executeUpdate() > 0) {
                     EmailNotifier.sendEmail("storagerentalproject@gmail.com", "New Reservation",
@@ -447,8 +465,6 @@ public static boolean isUser(String username) { //returns true if the given stri
             return false;
         }
     }
-
-
 
 
     public static boolean cancelReservation(int storageID, String email, String password) {
@@ -513,6 +529,7 @@ public static boolean isUser(String username) { //returns true if the given stri
             return false;
         }
     }
+
     public static int getUserIDByEmail(String email) {
         String sql = "SELECT id FROM users WHERE email = ?";
         try (Connection conn = getConnection();
@@ -528,6 +545,7 @@ public static boolean isUser(String username) { //returns true if the given stri
             throw new RuntimeException(e);
         }
     }
+
     public static String getEmailByUsername(String username) {
         String sql = "SELECT email FROM users WHERE userName = ?";
         try (Connection conn = getConnection();
@@ -540,6 +558,7 @@ public static boolean isUser(String username) { //returns true if the given stri
         }
         return null;
     }
+
     public static boolean isUnitReservedByUser(int storageID, String email) {
         String query = "SELECT 1 FROM storage_reservations WHERE storage_id = ? AND customer_email = ?";
         try (Connection conn = getConnection();
@@ -552,6 +571,58 @@ public static boolean isUser(String username) { //returns true if the given stri
         } catch (SQLException e) {
             System.err.println("Error checking reservation ownership: " + e.getMessage());
             return false;
+        }
+    }
+
+    public static List<Integer> getReservationRevenueInfo() { //Helper for getRevenue in AdminGUI
+        String sql = "SELECT start_date, end_date, price FROM storage_reservations";
+        List<Integer> storageInfo = new ArrayList<>();
+
+        try (Connection conn = MySQL.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                LocalDate startDate = rs.getDate("start_date").toLocalDate();
+                LocalDate endDate = rs.getDate("end_date").toLocalDate();
+
+                int price = rs.getInt("price");
+
+                long monthsBetween = ChronoUnit.MONTHS.between(
+                        startDate.withDayOfMonth(1),
+                        endDate.withDayOfMonth(1)
+                );
+
+                if (monthsBetween > 0) {
+                    storageInfo.add((int) monthsBetween);
+                    storageInfo.add(price);
+                }
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return storageInfo;
+    }
+
+
+    public static int getPrice(int storage_id) { //Helper for getReservationRevenueInfo, it grabs the price of a storage unit given a units id.
+        String sql = "SELECT price FROM storage WHERE id = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, storage_id);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("price");
+                } else {
+                    return -1;
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 
