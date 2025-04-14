@@ -12,6 +12,7 @@ public class MyGUI {
     private String username;
     private UserGUI userGUI; // make userGUI be a private attribute to be able to invoke it elsewhere
     private CancelGUI cancelGUI;
+    private ManageStorageGUI storageManageScreen;
 
     public MyGUI() {
         /////////////// Initial GUI Settings /////////////
@@ -28,7 +29,7 @@ public class MyGUI {
         StorageGUI storageScreen = new StorageGUI(this);
         RegisterGUI registerScreen = new RegisterGUI(this);
         AdminGUI adminScreen = new AdminGUI(this);
-        ManageStorageGUI storageManageScreen = new ManageStorageGUI(this);
+        storageManageScreen = new ManageStorageGUI(this);
         ManageUsersGUI userManageScreen = new ManageUsersGUI(this);
 
         // Collect my pages
@@ -92,6 +93,9 @@ public class MyGUI {
     }
 
     public void showMain(String panelName) {
+        if (panelName.equals("Manage Storage Screen")) {
+            storageManageScreen.refreshStorageList();
+        }
         cardLayout.show(cardpanel, panelName);
     }
 

@@ -6,6 +6,9 @@ import java.awt.event.ActionListener;
 public class LoginScreenGUI extends JPanel {
 
     private MyGUI myGui;
+    JTextField registerUserTxt;
+    JPasswordField passTxt;
+    JLabel userValid;
 
     public LoginScreenGUI(MyGUI myGui) {
         this.myGui = myGui; // Save reference
@@ -45,13 +48,13 @@ public class LoginScreenGUI extends JPanel {
         panel.add(userNameTxt, gbc);
 
         // Username text field
-        JTextField registerUserTxt = new JTextField(15);
+        registerUserTxt = new JTextField(15);
         gbc.gridx = 1;
         gbc.anchor = GridBagConstraints.WEST;
         panel.add(registerUserTxt, gbc);
 
         // Username validation message
-        JLabel userValid = new JLabel("");
+        userValid = new JLabel("");
         userValid.setFont(new Font("SansSerif", Font.ITALIC, 10));
         userValid.setOpaque(true); // Allow for background of border to be colored
         userValid.setBackground(Color.BLACK); // Set background border color
@@ -76,7 +79,7 @@ public class LoginScreenGUI extends JPanel {
         panel.add(passLabel, gbc);
 
         // Password text field
-        JPasswordField passTxt = new JPasswordField(15);
+        passTxt = new JPasswordField(15);
         gbc.gridx = 1;
         gbc.anchor = GridBagConstraints.WEST;
         panel.add(passTxt, gbc);
@@ -101,38 +104,41 @@ public class LoginScreenGUI extends JPanel {
         panel.add(rConfirm, gbc);
 
         // Confirm button function
-        rConfirm.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String getUser = registerUserTxt.getText();
-                String getPass = String.valueOf(passTxt.getPassword());
+        rConfirm.addActionListener(e -> loginHandler());
 
-                // Clear error messages
-                userValid.setText("");
-
-                if (getUser.equals("admin") && getPass.equals("password")) { // Log in to Admin Screen
-                    // Clear text fields
-                    registerUserTxt.setText("");
-                    passTxt.setText("");
-
-                    myGui.showMain("Admin Screen"); // Redirect to Admin Screen
-                }
-                else if (MySQL.isUsernameAndPassword(getUser, getPass)) { // Log in to user screen
-
-                    // Clear text fields
-                    registerUserTxt.setText("");
-                    passTxt.setText("");
-                    myGui.setUsername(getUser);
-
-                    myGui.loginUser(getUser); // Redirect to User Screen by passing to MyGUI to save user info
-                }
-                else {
-                    userValid.setText("Invalid Credentials");
-                }
-            }
-        });
+        // Enter button event listener
+        registerUserTxt.addActionListener(e -> loginHandler());
+        passTxt.addActionListener(e -> loginHandler());
 
         // Add panel to LoginScreenGUI
         add(panel, BorderLayout.CENTER);
+    }
+
+    private void loginHandler() {
+        String getUser = registerUserTxt.getText();
+        String getPass = String.valueOf(passTxt.getPassword());
+
+        // Clear error messages
+        userValid.setText("");
+
+        if (getUser.equals("admin") && getPass.equals("password")) { // Log in to Admin Screen
+            // Clear text fields
+            registerUserTxt.setText("");
+            passTxt.setText("");
+
+            myGui.showMain("Admin Screen"); // Redirect to Admin Screen
+        }
+        else if (MySQL.isUsernameAndPassword(getUser, getPass)) { // Log in to user screen
+
+            // Clear text fields
+            registerUserTxt.setText("");
+            passTxt.setText("");
+            myGui.setUsername(getUser);
+
+            myGui.loginUser(getUser); // Redirect to User Screen by passing to MyGUI to save user info
+        }
+        else {
+            userValid.setText("Invalid Credentials");
+        }
     }
 }
