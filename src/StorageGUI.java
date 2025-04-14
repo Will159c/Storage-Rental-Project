@@ -269,7 +269,7 @@ public class StorageGUI extends JPanel {
 
         gbc.gridy++; // <-- add this
         gbc.gridx = 0;
-        panel.add(new JLabel("Enter Password:"), gbc);
+        panel.add(new JLabel("Reenter Password:"), gbc);
 
         gbc.gridx = 1;
         JPasswordField passwordField = new JPasswordField(15);
@@ -279,7 +279,7 @@ public class StorageGUI extends JPanel {
         if (!reserved) {
             gbc.gridy++;
             gbc.gridx = 0;
-            panel.add(new JLabel("Enter 16 Digit Card Number:"), gbc);
+            panel.add(new JLabel("Enter 16 Digit Credit Card Number:"), gbc);
             gbc.gridx = 1;
             cardField.setDocument(new PlainDocument() {
                 @Override
@@ -362,7 +362,7 @@ public class StorageGUI extends JPanel {
                     return;
                 }
                 if (!cardNumber.matches("\\d{16}")) {
-                    JOptionPane.showMessageDialog(null, "Please enter a valid 16-digit card number", "Invalid Card", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "Please enter a valid 16-digit credit card number", "Invalid Card", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
             }
