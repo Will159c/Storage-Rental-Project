@@ -1,7 +1,11 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+
+/**
+ * This class is is the setup for the overall GUI. It holds the pages for the other GUI classes,
+ * initializes them, and controls the navigation between pages. It allows the other pages to transfer
+ * information between one another.
+ */
 public class MyGUI {
 
     private static JLabel titleTxt;
@@ -10,10 +14,22 @@ public class MyGUI {
     private static JPanel cardpanel;
     private static CardLayout cardLayout;
     private String username;
+    /**
+     * Allows for user view after log in or returning to User page
+     */
     private UserGUI userGUI; // make userGUI be a private attribute to be able to invoke it elsewhere
+    /**
+     * Needed for going to page for cancelling reservations
+     */
     private CancelGUI cancelGUI;
+    /**
+     * Needed for going to admin page for creating storage units and updating page
+     */
     private ManageStorageGUI storageManageScreen;
 
+    /**
+     * Initializes and displays the GUI frame used for the program. Also sets up the GUI pages using cardlayout
+     */
     public MyGUI() {
         /////////////// Initial GUI Settings /////////////
         JFrame frame = new JFrame();
@@ -48,6 +64,10 @@ public class MyGUI {
         frame.setVisible(true);
     }
 
+    /**
+     * Creates the welcome screen panel, allowing the user to login or register using JButtons
+     * @return the create welcome screen panel
+     */
     private JPanel welcomeScreen() {
         ///////////// Initial Settings ///////////
         JPanel panel = new BackgroundSetter("/background.jpg", new GridBagLayout());
@@ -92,6 +112,14 @@ public class MyGUI {
         return panel;
     }
 
+    /**
+     * Displays the requested screen/panel using it's name.
+     * Also checks if the requested page is the Manage Storage Page
+     * (Create Storage Unit Page) to refresh the list of units after
+     * new unit is created.
+     *
+     * @param panelName the name of the page/panel to display
+     */
     public void showMain(String panelName) {
         if (panelName.equals("Manage Storage Screen")) {
             storageManageScreen.refreshStorageList();
@@ -99,18 +127,41 @@ public class MyGUI {
         cardLayout.show(cardpanel, panelName);
     }
 
+    /**
+     * Adds panel to the cardlayout in StorageGUI (the
+     * Reservation page)
+     *
+     * @param panel
+     * @param name
+     */
     public void addPanel(JPanel panel, String name) {
         cardpanel.add(panel, name);
     }
 
+    /**
+     * Set's the current logged-in username
+     *
+     * @param username the username to set
+     */
     public void setUsername(String username) {
         this.username = username;
     }
 
+    /**
+     * Returns currently set username
+     *
+     * @return username
+     */
     public String getUsername() {
         return this.username;
     }
 
+    /**
+     * Logs the user into the UserGUI page
+     * Used for log-in screen and returns to the User page
+     *
+     * @param user username of the user currently logged in
+     */
     public void loginUser(String user) { // Allow for information to be passed after login
         // Set the information ready for User GUI
         this.username = user;
@@ -123,6 +174,14 @@ public class MyGUI {
         cardLayout.show(cardpanel, "User Screen");
     }
 
+    /**
+     * Switch to cancellation screen while transfering
+     * user's username and the storage unit ID to cancel
+     * reservation
+     *
+     * @param user the user cancelling their reservation
+     * @param id the storage unit ID
+     */
     public void toCancellation(String user, int id) {
         cancelGUI = new CancelGUI(this, user, id);
         cardpanel.add(cancelGUI, "Cancel Reservation");

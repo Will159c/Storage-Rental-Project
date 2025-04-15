@@ -1,8 +1,11 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
+/**
+ * The login screen panel that allows the user to login as the admin or regular
+ * user, provided they give the correct credentials. Handles the user input, basic authentication,
+ * and navigation to the admin page, user page, or welcome screen.
+ */
 public class LoginScreenGUI extends JPanel {
 
     private MyGUI myGui;
@@ -10,6 +13,12 @@ public class LoginScreenGUI extends JPanel {
     JPasswordField passTxt;
     JLabel userValid;
 
+    /**
+     * Constructs login screen with the username and password
+     * labels and fields. Also provides buttons and key listener for
+     * logging in or returning to home screen.
+     * @param myGui reference to the main GUI controller
+     */
     public LoginScreenGUI(MyGUI myGui) {
         this.myGui = myGui; // Save reference
         setLayout(new BorderLayout());
@@ -114,6 +123,10 @@ public class LoginScreenGUI extends JPanel {
         add(panel, BorderLayout.CENTER);
     }
 
+    /**
+     * Handles the login logic: validates user credentials, clears fields after login,
+     * and navigates user to correct page based on whether they are an admin or user.
+     */
     private void loginHandler() {
         String getUser = registerUserTxt.getText();
         String getPass = String.valueOf(passTxt.getPassword());
