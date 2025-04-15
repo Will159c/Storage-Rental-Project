@@ -3,10 +3,34 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+/**
+ * GUI page for user registration.
+ *
+ * Displays the labels for the username, email, password,
+ * and confirmation password along with their designated
+ * text fields. Performs a validation check and inserts
+ * the new user into the database if check passes. Returns
+ * to the main menu if user is successfully created, or shows
+ * error messages if one or more checks fail.
+ */
 public class RegisterGUI extends JPanel {
 
     private MyGUI myGui;
+    private JLabel userValid;
+    private JLabel emailValid;
+    private JLabel passValid;
+    private JLabel cpassValid;
+    private JTextField registerUserTxt;
+    private JTextField emailTxt;
+    private JPasswordField passTxt;
+    private JPasswordField cpassTxt;
 
+    /**
+     * Constructs the RegisterGUI page and sets up the
+     * labels, text fields, and buttons.
+     *
+     * @param myGui Reference to the main GUI controller for navigation
+     */
     public RegisterGUI(MyGUI myGui) {
         this.myGui = myGui;
         setLayout(new BorderLayout());
@@ -48,14 +72,14 @@ public class RegisterGUI extends JPanel {
         panel.add(userNameTxt, gbc);
 
         // Username text field
-        JTextField registerUserTxt = new JTextField(15);
+        registerUserTxt = new JTextField(15);
         gbc.gridy = 1;
         gbc.gridx = 1;
         gbc.anchor = GridBagConstraints.WEST; // Keep this to the right
         panel.add(registerUserTxt, gbc);
 
         // Confirm username is valid
-        JLabel userValid = new JLabel("");
+        userValid = new JLabel("");
         userValid.setFont(new Font("SansSerif", Font.ITALIC, 10));
         userValid.setOpaque(true);
         userValid.setBackground(Color.BLACK); // Set background border color
@@ -82,14 +106,14 @@ public class RegisterGUI extends JPanel {
         panel.add(emailLabel, gbc);
 
         // Email text field
-        JTextField emailTxt = new JTextField(15);
+        emailTxt = new JTextField(15);
         gbc.gridy = 3;
         gbc.gridx = 1;
         gbc.anchor = GridBagConstraints.WEST; // Keep this to the right
         panel.add(emailTxt, gbc);
 
         // Confirm email is valid
-        JLabel emailValid = new JLabel("");
+        emailValid = new JLabel("");
         emailValid.setFont(new Font("SansSerif", Font.ITALIC, 10));
         emailValid.setOpaque(true); // Allow for background of border to be colored
         emailValid.setBackground(Color.BLACK); // Set background border color
@@ -116,14 +140,14 @@ public class RegisterGUI extends JPanel {
         panel.add(passLabel, gbc);
 
         // Password text field
-        JPasswordField passTxt = new JPasswordField(15);
+        passTxt = new JPasswordField(15);
         gbc.gridy = 5;
         gbc.gridx = 1;
         gbc.anchor = GridBagConstraints.WEST; // Keep this to the right
         panel.add(passTxt, gbc);
 
         // Confirm password is valid
-        JLabel passValid = new JLabel("");
+        passValid = new JLabel("");
         passValid.setFont(new Font("SansSerif", Font.ITALIC, 10));
         passValid.setOpaque(true); // Allow for background of border to be colored
         passValid.setBackground(Color.BLACK); // Set background border color
@@ -150,14 +174,14 @@ public class RegisterGUI extends JPanel {
         panel.add(cpassLabel, gbc);
 
         // Confirm Password text field
-        JPasswordField cpassTxt = new JPasswordField(15);
+        cpassTxt = new JPasswordField(15);
         gbc.gridy = 7;
         gbc.gridx = 1;
         gbc.anchor = GridBagConstraints.WEST; // Keep this to the right
         panel.add(cpassTxt, gbc);
 
         // Confirm password confirmation is valid
-        JLabel cpassValid = new JLabel("");
+        cpassValid = new JLabel("");
         cpassValid.setFont(new Font("SansSerif", Font.ITALIC, 10));
         cpassValid.setOpaque(true); // Allow for background of border to be colored
         cpassValid.setBackground(Color.BLACK); // Set background border color
@@ -203,54 +227,75 @@ public class RegisterGUI extends JPanel {
                 String getPass = String.valueOf(passTxt.getPassword());
                 String getCPass = String.valueOf(cpassTxt.getPassword());
 
-                // Clear error messages
-                userValid.setText("");
-                passValid.setText("");
-                cpassValid.setText("");
-                emailValid.setText("");
-                //emailValid.setText("Email already in use");
-
-                // Check registration validity
-                if (validate(getUser, getEmail, getPass, getCPass)) {
-                    //System.out.println("Valid Registration");
-                    MySQL.insertUser(getUser, getPass, getEmail); // Create account into database with email
-
-                    // Dialog box
-                    JOptionPane.showMessageDialog(null, "Account Successfully Created. Please Log-in.", "", JOptionPane.INFORMATION_MESSAGE);
-
-                    // Clear text fields
-                    registerUserTxt.setText("");
-                    emailTxt.setText("");
-                    passTxt.setText("");
-                    cpassTxt.setText("");
-
-                    // Return to main menu
-                    myGui.showMain("Welcome Screen");
-                }
-                else {
-                    if (MySQL.isUser(getUser)) { // Check if username is already used, if so reject registration
-                        userValid.setText("Invalid Username");
-                    }
-                    if (getPass.length() < 4) { // Check if password is less than 4 chara
-                        passValid.setText("Password must be at least 4 characters");
-                    }
-                    if (!getPass.contains(getCPass)) {
-                        cpassValid.setText("Passwords don't match");
-                    }
-                    if (!getEmail.contains("@")) {
-                        emailValid.setText("Invalid format");
-                    }
-                    if (MySQL.isEmail(getEmail)) {
-                        emailValid.setText("Email already in use");
-                    }
-                }
+                handleRegistration(getUser, getEmail, getPass, getCPass);
             }
         });
 
         add(panel, BorderLayout.CENTER);
     }
 
-    public static boolean validate(String userTxt, String emailTxt, String password, String cPassword) {
+    /**
+     * Handles registration logic.
+     * Validates user inputs, shows error messages,
+     * inserts user into the database, and resets page
+     * after validation.
+     *
+     * @param getUser Username entered
+     * @param getEmail Email entered
+     * @param getPass Password entered
+     * @param getCPass Confirm password entered
+     */
+    private void handleRegistration(String getUser, String getEmail, String getPass, String getCPass) {
+        // Clear error messages
+        userValid.setText("");
+        passValid.setText("");
+        cpassValid.setText("");
+        emailValid.setText("");
+
+        // Check registration validity
+        if (validate(getUser, getEmail, getPass, getCPass)) {
+            MySQL.insertUser(getUser, getPass, getEmail); // Create account into database with email
+
+            // Dialog box
+            JOptionPane.showMessageDialog(null, "Account Successfully Created. Please Log-in.", "", JOptionPane.INFORMATION_MESSAGE);
+
+            // Clear text fields
+            registerUserTxt.setText("");
+            emailTxt.setText("");
+            passTxt.setText("");
+            cpassTxt.setText("");
+
+            // Return to main menu
+            myGui.showMain("Welcome Screen");
+        }
+        else {
+            if (MySQL.isUser(getUser)) { // Check if username is already used, if so reject registration
+                userValid.setText("Invalid Username");
+            }
+            if (getPass.length() < 4) { // Check if password is less than 4 chara
+                passValid.setText("Password must be at least 4 characters");
+            }
+            if (!getPass.equals(getCPass)) {
+                cpassValid.setText("Passwords don't match");
+            }
+            if (!getEmail.contains("@")) {
+                emailValid.setText("Invalid format");
+            }
+            if (MySQL.isEmail(getEmail)) {
+                emailValid.setText("Email already in use");
+            }
+        }
+    }
+
+    /**
+     * Checks if all user input is valid
+     * @param userTxt Username entered
+     * @param emailTxt Email entered
+     * @param password Password entered
+     * @param cPassword Confirm password entered
+     * @return true if all fields are valid, otherwise false
+     */
+    private boolean validate(String userTxt, String emailTxt, String password, String cPassword) {
 
         if (MySQL.isUser(userTxt)) { // Check if username is already used, if so reject registration
             return false;
@@ -258,7 +303,7 @@ public class RegisterGUI extends JPanel {
         else if (password.length() < 4) { // Check if password is less than 4 chara
             return false;
         }
-        else if (!password.contains(cPassword)) {
+        else if (!password.equals(cPassword)) { // Check if passwords match
             return false;
         }
         else if (!emailTxt.contains("@")) {
