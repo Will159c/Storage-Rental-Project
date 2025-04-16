@@ -304,6 +304,7 @@ public class StorageGUI extends JPanel {
     }
 
     /**
+     * Created by: Alexis Anguiano
      * Opens a panel for the selected storage unit, allowing the user to reserve or cancel
      * @param storageID the ide of the unit selected
      */
@@ -334,6 +335,7 @@ public class StorageGUI extends JPanel {
     }
 
     /**
+     * Created by: Alexis Anguiano
      * Creates and return a base gridbadcontraints with defualt insetsand fill mode
      * @return configured gridbadcontraints object
      */
@@ -345,6 +347,7 @@ public class StorageGUI extends JPanel {
     }
 
     /**
+     * Created by: Alexis Anguiano
      * Adds the header section to the reservation panel with storage ID and email
      * @param panel the panel to add compnents to
      * @param gbc layout constraints
@@ -365,6 +368,7 @@ public class StorageGUI extends JPanel {
     }
 
     /**
+     * Created by: Alexis Anguiano
      * Adds and return a pssword input field to the panel
      * @param panel the panel to add the field to
      * @param gbc layout constraints
@@ -381,6 +385,7 @@ public class StorageGUI extends JPanel {
     }
 
     /**
+     * Created by: Alexis Anguiano
      * Adds and return a 16 digit credit card input field
      * @param panel the panel to add the field to
      * @param gbc layout constraints
@@ -405,6 +410,7 @@ public class StorageGUI extends JPanel {
     }
 
     /**
+     * Created by: Alexis Anguiano
      * Adds start and end date pickers to the panel
      * @param panel the panel to add to
      * @param gbc layout constraints
@@ -435,6 +441,7 @@ public class StorageGUI extends JPanel {
     }
 
     /**
+     * Created by: Alexis Anguiano
      * Adds a reserve or cancel button depends on reservation state and a back button to return to main screen
      * @param panel reservation panel
      * @param gbc layout manager
@@ -478,6 +485,7 @@ public class StorageGUI extends JPanel {
     }
 
     /**
+     * Created by: Alexis Anguiano
      * Handles reservation logic: validated card number,dates,and inserts reservation in datebase.
      * Sends email confirmation and updates the GUI.
      * @param storageID id of unit
@@ -518,6 +526,7 @@ public class StorageGUI extends JPanel {
     }
 
     /**
+     * Created by: Alexis Anguiano
      * Handles cancelation logic: removes rerservation and refreshes the GUI
      * @param storageID unit ID the was canceled
      * @param email user's email
