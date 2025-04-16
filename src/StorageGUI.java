@@ -234,7 +234,7 @@ public class StorageGUI extends JPanel {
     /**
      * Creates a storage unit square panel that displays unit details and appropriate action components.
      * @param sd the storage details object.
-     * @return a JPanel representing the storage unit square.
+     * @return a JPanel representing the storage unit square
      */
     private JPanel createStorageSquare(MySQL.StorageDetails sd) {
         JPanel unitPanel = new JPanel();
