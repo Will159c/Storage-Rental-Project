@@ -426,6 +426,18 @@ public class MySQL {
 
     }
 
+    /**
+     * Created by: Alexis Anguiano
+     * Attempts to reserve a storage unit
+     * @param storageID unit ID
+     * @param email customer email
+     * @param id_user user ID
+     * @param password password for verification
+     * @param startDate reservation start date
+     * @param endDate reservation end date
+     * @param price price of unit
+     * @return true if successful false otherwise
+     */
     public static boolean reserveStorageUnit(int storageID, String email, int id_user, String password, Date startDate, Date endDate, int price) {
         if (!isEmailAndPasswordValid(email, password)) {
             System.out.println("Invalid email or password.");
@@ -466,7 +478,14 @@ public class MySQL {
         }
     }
 
-
+    /**
+     * Created by: Alexis Anguiano
+     * Cancels a reservation if the user and unit match
+     * @param storageID unit ID
+     * @param email customer email
+     * @param password password for verification
+     * @return true if successfully canceled.
+     */
     public static boolean cancelReservation(int storageID, String email, String password) {
         if (!isEmailAndPasswordValid(email, password)) {
             System.out.println("Invalid email or password.");
@@ -511,7 +530,13 @@ public class MySQL {
         }
     }
 
-
+    /**
+     *Created by: Alexis Anguiano
+     * Validates email/password combination exists in users table
+     * @param email unit ID
+     * @param password users password
+     * @return true if valid
+     */
     public static boolean isEmailAndPasswordValid(String email, String password) {
         String query = "SELECT EXISTS (SELECT 1 FROM users WHERE email = ? AND password = ?)";
 
@@ -530,6 +555,12 @@ public class MySQL {
         }
     }
 
+    /**
+     * Created by: Alexis Anguiano
+     * gets a users id by email
+     * @param email the email
+     * @return user id if found
+     */
     public static int getUserIDByEmail(String email) {
         String sql = "SELECT id FROM users WHERE email = ?";
         try (Connection conn = getConnection();
@@ -546,6 +577,12 @@ public class MySQL {
         }
     }
 
+    /**
+     * Created by: Alexis Anguiano
+     * Gets users email from username
+      * @param username clients username
+     * @return associated email or null
+     */
     public static String getEmailByUsername(String username) {
         String sql = "SELECT email FROM users WHERE userName = ?";
         try (Connection conn = getConnection();
@@ -559,6 +596,13 @@ public class MySQL {
         return null;
     }
 
+    /**
+     * Created by: Alexis Anguiano
+     * Checks if a reservation belongs to a specific user
+     * @param storageID unit id
+     * @param email customer email
+     * @return true if match
+     */
     public static boolean isUnitReservedByUser(int storageID, String email) {
         String query = "SELECT 1 FROM storage_reservations WHERE storage_id = ? AND customer_email = ?";
         try (Connection conn = getConnection();
