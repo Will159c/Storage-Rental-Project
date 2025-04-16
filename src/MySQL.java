@@ -35,12 +35,18 @@ public class MySQL {
     private static final String USER = "root";
     private static final String PASSWORD = "Replace Here"; // Replace with actual password
 
+    /**
+     * Establishes and returns a database connection using predefined URL, user, and password.
+     * @return a {@link Connection} to the database
+     * @throws SQLException if a database access error occurs
+     */
     private static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(URL, USER, PASSWORD);
     }
 
-
-    // NEW: Added inner class to hold storage unit details in memory
+    /**
+     * Holds the details of a storage unit in memory to display the units faster.
+     */
     public static class StorageDetails {
         private int id;
         private String size;
@@ -48,6 +54,14 @@ public class MySQL {
         private String location;
         private boolean reserved;
 
+        /**
+         * new instance for the cache like structure of StorageDetails.
+         * @param id        the storage unit's ID
+         * @param size      the size of the storage unit
+         * @param price     the price of the storage unit
+         * @param location  the location of the storage unit
+         * @param reserved  {@code true} if the storage unit is reserved; {@code false} otherwise
+         */
         public StorageDetails(int id, String size, int price, String location, boolean reserved) {
             this.id = id;
             this.size = size;
@@ -56,28 +70,48 @@ public class MySQL {
             this.reserved = reserved;
         }
 
+        /**
+         * @return the storage unit's ID
+         */
         public int getId() {
             return id;
         }
 
+        /**
+         * @return the storage unit's size
+         */
         public String getSize() {
             return size;
         }
 
+        /**
+         * @return the storage unit's price
+         */
         public int getPrice() {
             return price;
         }
 
+        /**
+         * @return the storage unit's location
+         */
         public String getLocation() {
             return location;
         }
 
+        /**
+         * Indicates whether the storage unit is reserved.
+         *
+         * @return {@code true} if reserved, {@code false} otherwise
+         */
         public boolean isReserved() {
             return reserved;
         }
     }
 
-    // get info of the storages in one function
+    /**
+     * Retrieves all storage unit details from the database.
+     * @return a {@code List} of {@link StorageDetails} objects containing storage unit information
+     */
     public static List<StorageDetails> getAllStorageDetails() {
         String sql = "SELECT s.id, s.size, s.price, s.location, r.storage_id AS reserved " +
                 "FROM storage s " +
@@ -93,6 +127,7 @@ public class MySQL {
                 String size = rs.getString("size");
                 int price = rs.getInt("price");
                 String location = rs.getString("location");
+                // Determines if the storage unit is reserved by checking if the "reserved" column is non-null.
                 boolean isReserved = (rs.getObject("reserved") != null);
                 allUnits.add(new StorageDetails(id, size, price, location, isReserved));
             }
@@ -103,6 +138,7 @@ public class MySQL {
 
         return allUnits;
     }
+
 
     public static boolean isUser(String username) { //returns true if the given string username already exists
         String checkIfUsernameExists = "SELECT EXISTS (SELECT 1 FROM users WHERE username = ?)";
