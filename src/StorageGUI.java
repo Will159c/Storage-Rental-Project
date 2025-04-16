@@ -10,39 +10,74 @@ import javax.swing.text.BadLocationException;
 import org.jdatepicker.impl.*;
 import java.util.Properties;
 
-
-
+/**
+ * A) Class Name: StorageGUI
+ * B) Date of Code: April 15, 2025,
+ * C) Programmer's Name: Juan Acevedo, Alexis Anguiano
+ * D) Brief Desc: StorageGUI the GUI page to display and manage storage units.
+   It displays storage units as squares with a bunch of sort options,
+   sort them by price or size, filter by location, and reserve or cancel a reservation.
+ * e) Brief Explanation of Important Functions:
+ *    - showAllUnits: Fetches all units from the database and displays them.
+ *    - showAvailableUnits: Filters and displays only non-reserved units.
+ *    - createStorageSquare: Builds a GUI panel to represent a single storage unit,
+ *      including status indicators and a reserve button.
+ *    - openReservationPanel: Opens a panel to handle reservation or cancellation details.
+ * f) Important Data Structures:
+ *    - MySQL: Stores storage units in memory (in a List).
+ *    - Comparator: Used to sort units by price or size.
+ * g) Algorithms Used:
+ *    - Sorting via Collections.sort() with Comparator for ascending/descending price or size.
+ *    - Basic date validation and credit card number checks (simple string matching).
+ */
 
 public class StorageGUI extends JPanel {
+
+    /**
+     * Reference to the main GUI page.
+     * */
     private MyGUI myGui;
+
+    /**
+     * A panel used to display the storage unit squares.
+     * */
     private JPanel squaresPanel;
+
+    /**
+     * Scroll pane to scroll the squaresPanel.
+     * */
     private JScrollPane scrollPane;
 
-    // NEW: In-memory list of storage units to avoid repeated DB calls
+    /**
+     * In-memory list of storage units to avoid repeated DB calls.
+     * Uses MySQL.StorageDetails to store unit details.
+     */
     private List<MySQL.StorageDetails> allUnits;
 
-    // Removed the original inner StorageDetails class; now using MySQL.StorageDetails
-
+    /**
+     * Constructs a new StorageGUI panel.
+     * @param myGui the main GUI controller object.
+     */
     public StorageGUI(MyGUI myGui) {
         this.myGui = myGui;
         setLayout(new BorderLayout());
 
-        // NEW: Load all storage units in one call
+        // NEW: Load all storage units in one call.
         allUnits = MySQL.getAllStorageDetails();
 
-        // title
+        // Create and add title.
         JLabel titleTxt = new JLabel("Storage Units Browser", SwingConstants.CENTER);
         titleTxt.setFont(new Font("SansSerif", Font.BOLD, 20));
         add(titleTxt, BorderLayout.NORTH);
 
-        // 2 buttons for the 2 search types
+        // Create the top panel with search and sort controls.
         JPanel topBtnPanel = new JPanel();
         JButton viewAllBtn = new JButton("View All Units");
         JButton viewAvailBtn = new JButton("View Available Units");
 
-        // combo box for price sort options
+        // Combo box for price sort options.
         String[] priceOptions = {
-                "Price: Lowest to Highest" ,
+                "Price: Lowest to Highest",
                 "Price: Highest to Lowest"
         };
         JComboBox<String> priceSortCombo = new JComboBox<>(priceOptions);
@@ -54,14 +89,14 @@ public class StorageGUI extends JPanel {
             }
         });
 
-        // combo box for size sort options
+        // Combo box for size sort options.
         String[] sizeOptions = {
                 "Size: Smallest to Biggest",
                 "Size: Biggest to Smallest"
         };
         JComboBox<String> sizeSortCombo = new JComboBox<>(sizeOptions);
         sizeSortCombo.addActionListener(e -> {
-            // Here, adjust the order as needed (true/false) based on your original behavior
+            // Adjust the order as needed based on the selected index.
             if (sizeSortCombo.getSelectedIndex() == 0) {
                 showUnitsSortedBySize(false);
             } else {
@@ -74,6 +109,7 @@ public class StorageGUI extends JPanel {
         topBtnPanel.add(priceSortCombo);
         topBtnPanel.add(sizeSortCombo);
 
+        // Create a combo box for location filtering.
         Set<String> locationSet = new HashSet<>();
         for (MySQL.StorageDetails sd : allUnits) {
             locationSet.add(sd.getLocation());
@@ -98,23 +134,26 @@ public class StorageGUI extends JPanel {
 
         add(topBtnPanel, BorderLayout.PAGE_START);
 
-        // it lets us scroll when there are more units than the screen fits
+        // Setup the scrolling panel for storage unit squares.
         squaresPanel = new JPanel();
         squaresPanel.setLayout(new GridLayout(0, 4, 10, 10));
         squaresPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         scrollPane = new JScrollPane(squaresPanel);
         add(scrollPane, BorderLayout.CENTER);
 
-        // a back button that sends the user back to the welcome screen
+        // Create and add the back button.
         JButton backBtn = new JButton("Back");
         backBtn.addActionListener(e -> myGui.loginUser(myGui.getUsername()));
         add(backBtn, BorderLayout.SOUTH);
 
-        // directs the button to what it will execute
+        // Add action listeners for viewing all and available units.
         viewAllBtn.addActionListener(e -> showAllUnits());
         viewAvailBtn.addActionListener(e -> showAvailableUnits());
     }
 
+    /**
+     * Retrieves all storage units, and displays them on the GUI.
+     */
     private void showAllUnits() {
         allUnits = MySQL.getAllStorageDetails();
         squaresPanel.removeAll();
@@ -125,8 +164,9 @@ public class StorageGUI extends JPanel {
         squaresPanel.repaint();
     }
 
-
-
+    /**
+     * Displays only the available (not reserved) storage units.
+     */
     private void showAvailableUnits() {
         squaresPanel.removeAll();
         for (MySQL.StorageDetails sd : allUnits) {
@@ -138,7 +178,10 @@ public class StorageGUI extends JPanel {
         squaresPanel.repaint();
     }
 
-
+    /**
+     * Displays storage units sorted by price.
+     * @param ascending if true, sorts from lowest to highest; otherwise, highest to lowest.
+     */
     private void showUnitsSortedByPrice(boolean ascending) {
         squaresPanel.removeAll();
         List<MySQL.StorageDetails> sorted = new ArrayList<>(allUnits);
@@ -154,6 +197,10 @@ public class StorageGUI extends JPanel {
         squaresPanel.repaint();
     }
 
+    /**
+     * Displays storage units sorted by size.
+     * @param ascending if true, sorts from smallest to biggest; otherwise, biggest to smallest.
+     */
     private void showUnitsSortedBySize(boolean ascending) {
         squaresPanel.removeAll();
         List<MySQL.StorageDetails> sorted = new ArrayList<>(allUnits);
@@ -169,6 +216,10 @@ public class StorageGUI extends JPanel {
         squaresPanel.repaint();
     }
 
+    /**
+     * Displays only storage units filtered by a specific location.
+     * @param location the location filter to apply.
+     */
     private void showUnitsFilteredByLocation(String location) {
         squaresPanel.removeAll();
         for (MySQL.StorageDetails sd : allUnits) {
@@ -180,6 +231,11 @@ public class StorageGUI extends JPanel {
         squaresPanel.repaint();
     }
 
+    /**
+     * Creates a storage unit square panel that displays unit details and appropriate action components.
+     * @param sd the storage details object.
+     * @return a JPanel representing the storage unit square
+     */
     private JPanel createStorageSquare(MySQL.StorageDetails sd) {
         JPanel unitPanel = new JPanel();
         unitPanel.setPreferredSize(new Dimension(120, 140));
@@ -189,7 +245,7 @@ public class StorageGUI extends JPanel {
         gbc.gridx = 0;
         gbc.gridy = 0;
 
-        // Add basic details
+        // Display basic details
         unitPanel.add(new JLabel("ID: " + sd.getId()), gbc);
         gbc.gridy++;
         unitPanel.add(new JLabel("Size: " + sd.getSize()), gbc);
@@ -198,35 +254,31 @@ public class StorageGUI extends JPanel {
         gbc.gridy++;
         unitPanel.add(new JLabel("Location: " + sd.getLocation()), gbc);
 
-        // Check reservation status and add indicator
+        // Check reservation status and adjust display accordingly.
         if (sd.isReserved()) {
             String currentUserEmail = MySQL.getEmailByUsername(myGui.getUsername());
             JLabel reservedLabel = new JLabel();
             if (MySQL.isUnitReservedByUser(sd.getId(), currentUserEmail)) {
-                // Reserved by logged in user: use light green
-                unitPanel.setBackground(new Color(144, 238, 144)); // light green
+                // Reserved by the logged-in user: light green background.
+                unitPanel.setBackground(new Color(144, 238, 144)); // light green.
                 reservedLabel.setText("Reserved by you");
                 reservedLabel.setForeground(Color.GREEN.darker());
             } else {
-                // Reserved by someone else: use light red
-                unitPanel.setBackground(new Color(255, 182, 193)); // light red
+                // Reserved by someone else: light red background.
+                unitPanel.setBackground(new Color(255, 182, 193)); // light red.
                 reservedLabel.setText("Reserved");
                 reservedLabel.setForeground(Color.RED);
             }
             gbc.gridy++;
             unitPanel.add(reservedLabel, gbc);
-        }
 
-        // Mouse listener remains unchanged
-        unitPanel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                int storageID = sd.getId();
-                boolean isReserved = sd.isReserved();
-                String username = myGui.getUsername();
-                String email = MySQL.getEmailByUsername(username);
-
-                if (isReserved) {
+            // Add mouse listener for reserved squares.
+            unitPanel.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    int storageID = sd.getId();
+                    String username = myGui.getUsername();
+                    String email = MySQL.getEmailByUsername(username);
                     if (MySQL.isUnitReservedByUser(storageID, email)) {
                         openReservationPanel(storageID);
                     } else {
@@ -235,11 +287,15 @@ public class StorageGUI extends JPanel {
                                 "Access Denied",
                                 JOptionPane.ERROR_MESSAGE);
                     }
-                } else {
-                    openReservationPanel(storageID); // allow reservation
                 }
-            }
-        });
+            });
+        } else {
+            // If the unit is available, add a dedicated "Reserve" button.
+            JButton reserveBtn = new JButton("Reserve");
+            reserveBtn.addActionListener(e -> openReservationPanel(sd.getId()));
+            gbc.gridy++;
+            unitPanel.add(reserveBtn, gbc);
+        }
         return unitPanel;
     }
 
@@ -408,5 +464,4 @@ public class StorageGUI extends JPanel {
         showAllUnits();
         myGui.showMain("Storage Screen");
     }
-
 }
