@@ -20,7 +20,7 @@ import java.util.Date;
  * -getAllStorageDetails: Retrieves a full list of all storage units with reservation status.
  * -isUser, isUsernameAndPassword: Authenticates user credentials.
  * -insertUser,deleteUser: Creates and deletes user accounts
- * -insertContacttInfo: Adds contact info
+ * -insertContactInfo: Adds contact info
  * -reserveStorageUnit, cancelReservation: Handles storage units reservation/cancelation
  * -getUserID, getEmailByUsername: gets users info based on parameters inserted
  * -getReservationRevenueInfo: Helper for revenue calculation

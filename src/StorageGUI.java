@@ -299,6 +299,10 @@ public class StorageGUI extends JPanel {
         return unitPanel;
     }
 
+    /**
+     * Opens a panel for the selected storage unit, allowing the user to reserve or cancel
+     * @param storageID the ide of the unit selected
+     */
     private void openReservationPanel(int storageID) {
         boolean reserved = MySQL.isUnitReserved(storageID);
         JPanel panel = new JPanel(new GridBagLayout());
@@ -325,6 +329,10 @@ public class StorageGUI extends JPanel {
         myGui.showMain("Reservation Panel");
     }
 
+    /**
+     * Creates and return a base gridbadcontraints with defualt insetsand fill mode
+     * @return configured gridbadcontraints object
+     */
     private GridBagConstraints baseGBC() {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
@@ -332,6 +340,13 @@ public class StorageGUI extends JPanel {
         return gbc;
     }
 
+    /**
+     * Adds the header section to the reservation panel with storage ID and email
+     * @param panel the panel to add compnents to
+     * @param gbc layout constraints
+     * @param storageID id of unit
+     * @param email user's email
+     */
     private void addHeader(JPanel panel, GridBagConstraints gbc, int storageID, String email) {
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -345,6 +360,12 @@ public class StorageGUI extends JPanel {
         panel.add(new JLabel(email), gbc);
     }
 
+    /**
+     * Adds and return a pssword input field to the panel
+     * @param panel the panel to add the field to
+     * @param gbc layout constraints
+     * @return the card input field
+     */
     private JPasswordField addPasswordField(JPanel panel, GridBagConstraints gbc) {
         gbc.gridy++;
         gbc.gridx = 0;
@@ -355,6 +376,12 @@ public class StorageGUI extends JPanel {
         return pass;
     }
 
+    /**
+     * Adds and return a 16 digit credit card input field
+     * @param panel the panel to add the field to
+     * @param gbc layout constraints
+     * @return the card input field
+     */
     private JPasswordField addCardField(JPanel panel, GridBagConstraints gbc) {
         gbc.gridy++;
         gbc.gridx = 0;
@@ -373,6 +400,12 @@ public class StorageGUI extends JPanel {
         return card;
     }
 
+    /**
+     * Adds start and end date pickers to the panel
+     * @param panel the panel to add to
+     * @param gbc layout constraints
+     * @return array of [startpicker,endpicker]
+     */
     private JDatePickerImpl[] addDatePickers(JPanel panel, GridBagConstraints gbc) {
         Properties props = new Properties();
         props.put("text.month", "Month");
@@ -397,6 +430,19 @@ public class StorageGUI extends JPanel {
         return new JDatePickerImpl[]{startPicker, endPicker};
     }
 
+    /**
+     * Adds a reserve or cancel button depends on reservation state and a back button to return to main screen
+     * @param panel reservation panel
+     * @param gbc layout manager
+     * @param reserved if the unit is reserved
+     * @param storageID unit id
+     * @param email user's email
+     * @param price unit price
+     * @param passwordField password input
+     * @param cardField card input
+     * @param startPicker start date picker
+     * @param endPicker end date picker
+     */
     private void addActionButtons(JPanel panel, GridBagConstraints gbc, boolean reserved, int storageID, String email, int price,
                                   JPasswordField passwordField, JPasswordField cardField,
                                   JDatePickerImpl startPicker, JDatePickerImpl endPicker) {
@@ -427,7 +473,17 @@ public class StorageGUI extends JPanel {
         panel.add(backButton, gbc);
     }
 
-
+    /**
+     * Handles reservation logic: validated card number,dates,and inserts reservation in datebase.
+     * Sends email confirmation and updates the GUI.
+     * @param storageID id of unit
+     * @param email user's email
+     * @param price price of unit
+     * @param password password to verify
+     * @param cardField card number input
+     * @param startPicker start date picker
+     * @param endPicker end date picker
+     */
     private void handleReservation(int storageID, String email, int price, String password,
                                    JPasswordField cardField, JDatePickerImpl startPicker, JDatePickerImpl endPicker) {
         String cardNumber = new String(cardField.getPassword()).trim();
@@ -457,6 +513,12 @@ public class StorageGUI extends JPanel {
         myGui.loginUser(myGui.getUsername());
     }
 
+    /**
+     * Handles cancelation logic: removes rerservation and refreshes the GUI
+     * @param storageID unit ID the was canceled
+     * @param email user's email
+     * @param password verification password
+     */
     private void handleCancellation(int storageID, String email, String password) {
         MySQL.cancelReservation(storageID, email, password);
         JOptionPane.showMessageDialog(null, "Reservation canceled!", "Success", JOptionPane.INFORMATION_MESSAGE);
