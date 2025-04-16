@@ -4,13 +4,29 @@ import java.util.Properties;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Calendar;
-
+/**
+ * A) Class name: EmailNotifier
+ * B) Date of the Code: March 18 ,2025
+ * C) Programmer's name: Alexis Anguiano
+ * D) Brief description: Utility class for sending emails using the JavaMail API.
+ * E) Brief explanation of important function: sendEmail sends generic email given parameters.
+ * sendReservationConfirmation sens detaitled confirmation email. sendCancelConfirmation sends a email after cancellation.
+ * F) Important data structures: SMTP setting stored as properties.
+ * G) Algorithm used: Stateless static methods abstract JavaMail setup and sending to avoid instance creation.
+ */
 
 public class EmailNotifier {
     private static final String SMTP_HOST = "smtp.gmail.com";
     private static final String SMTP_PORT = "587";
     private static final String EMAIL_USER = System.getenv("EMAIL_USER");
     private static final String EMAIL_PASS = System.getenv("EMAIL_PASS");
+
+    /**
+     * Sends an email using SMTP credential (made email for storage unit company)
+     * @param recipient email address to send to
+     * @param subject subject line
+     * @param body text email body
+     */
 
     public static void sendEmail(String recipient, String subject, String body) {
         if (recipient == null || recipient.trim().isEmpty()) {
@@ -47,6 +63,13 @@ public class EmailNotifier {
         }
     }
 
+    /**
+     * Sends reservation confirmation email with rental info.
+     * @param recipient email of customer
+     * @param unitId storage unit ID
+     * @param startDate rental start date
+     * @param realEndDate rental end date
+     */
     public static void sendReservationConfirmation(String recipient, int unitId, Date startDate, Date realEndDate) {
         var details = MySQL.getStorageInformation(unitId);
         if (details.isEmpty()) {
@@ -85,7 +108,11 @@ public class EmailNotifier {
         sendEmail(recipient, "Storage Reservation Confirmed", body.toString());
     }
 
-
+    /**
+     * Sends cancelation confirmation email
+     * @param recipient email of customer
+     * @param unitId storage ID
+     */
     public static void sendCancellationConfirmation(String recipient, int unitId) {
         var details = MySQL.getStorageInformation(unitId);
         if (details.isEmpty()) {

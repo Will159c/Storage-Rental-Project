@@ -9,7 +9,7 @@ import java.util.Calendar;
  * C) Programmer's name: Alexis Anguiano
  * D) Brief description: Utility class used by JDatePicker to convert between Date and String. It handles formatting user selected dates and parsing back into usable values.
  * E) Brief explanation of important function: stringToValue parses a string to a date object. valueToString formats a date to a string.
- * F) Important ata structures: Uses simpledateformat internally with fixed format: m-d-y
+ * F) Important data structures: Uses simpledateformat internally with fixed format: m-d-y
  * G) Algorithm used: simpledateformat
  */
 
@@ -18,9 +18,9 @@ public class DateLabelFormatter extends JFormattedTextField.AbstractFormatter {
 
     /**
      * Converts a string to a {@link java.util.Date}.
-     * @param text
-     * @return
-     * @throws ParseException
+     * @param text the date string
+     * @return the parsed date
+     * @throws ParseException if the date is invalid
      */
     @Override
     public Object stringToValue(String text) throws ParseException {
@@ -29,8 +29,8 @@ public class DateLabelFormatter extends JFormattedTextField.AbstractFormatter {
 
     /**
      * Converts a {@link java.util.Date} to a string
-     * @param value
-     * @return
+     * @param value value the date object
+     * @return formatted date string
      * @throws ParseException
      */
     @Override
