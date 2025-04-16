@@ -73,7 +73,7 @@ public class StorageGUI extends JPanel {
         // Create the top panel with search and sort controls.
         JPanel topBtnPanel = new JPanel();
         topBtnPanel.setOpaque(false);  // Make background transparent so our painted image shows through
-        JButton viewAllBtn = new JButton("View All Units");
+
         JButton viewAvailBtn = new JButton("View Available Units");
 
         // Combo box for price sort options.
@@ -104,7 +104,7 @@ public class StorageGUI extends JPanel {
             }
         });
 
-        topBtnPanel.add(viewAllBtn);
+
         topBtnPanel.add(viewAvailBtn);
         topBtnPanel.add(priceSortCombo);
         topBtnPanel.add(sizeSortCombo);
@@ -151,8 +151,9 @@ public class StorageGUI extends JPanel {
         add(backBtn, BorderLayout.SOUTH);
 
         // Add action listeners for viewing all and available units.
-        viewAllBtn.addActionListener(e -> showAllUnits());
+
         viewAvailBtn.addActionListener(e -> showAvailableUnits());
+        showAllUnits();
     }
 
     /**
