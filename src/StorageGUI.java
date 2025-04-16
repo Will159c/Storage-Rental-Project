@@ -241,42 +241,92 @@ public class StorageGUI extends JPanel {
      * @return a JPanel representing the storage unit square
      */
     private JPanel createStorageSquare(MySQL.StorageDetails sd) {
-        JPanel unitPanel = new JPanel();
-        unitPanel.setPreferredSize(new Dimension(120, 140));
+        JPanel unitPanel = new JPanel(new BorderLayout());
+        unitPanel.setPreferredSize(new Dimension(200, 300));
         unitPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        unitPanel.setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 0;
 
-        // Display basic details
-        unitPanel.add(new JLabel("ID: " + sd.getId()), gbc);
-        gbc.gridy++;
-        unitPanel.add(new JLabel("Size: " + sd.getSize()), gbc);
-        gbc.gridy++;
-        unitPanel.add(new JLabel("Price: $" + sd.getPrice()), gbc);
-        gbc.gridy++;
-        unitPanel.add(new JLabel("Location: " + sd.getLocation()), gbc);
+        JPanel topPanel = new JPanel();
+        // Use a vertical BoxLayout so labels stack
+        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
+        topPanel.setOpaque(false); // Keep it transparent if you have colored backgrounds
+        // Add some spacing around the labels
+        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
 
-        // Check reservation status and adjust display accordingly.
+        // Create labels, each centered horizontally
+        JLabel idLabel = new JLabel("ID: " + sd.getId(), SwingConstants.CENTER);
+        idLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JLabel sizeLabel = new JLabel("Size: " + sd.getSize(), SwingConstants.CENTER);
+        sizeLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JLabel priceLabel = new JLabel("Price: $" + sd.getPrice(), SwingConstants.CENTER);
+        priceLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JLabel locationLabel = new JLabel("Location: " + sd.getLocation(), SwingConstants.CENTER);
+        locationLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        // Add them to topPanel
+        topPanel.add(idLabel);
+        topPanel.add(sizeLabel);
+        topPanel.add(priceLabel);
+        topPanel.add(locationLabel);
+
+        unitPanel.add(topPanel, BorderLayout.NORTH);
+        JPanel centerPanel = new JPanel(new GridBagLayout());
+        centerPanel.setOpaque(false); // Transparent so background can show
+        JLabel imageLabel = new JLabel();
+        String location = sd.getLocation();
+        String imageName = "background.jpg";
+        if ("Lancaster".equalsIgnoreCase(location)) {
+            imageName = "lancaster.png";
+        } else if ("Downtown LA".equalsIgnoreCase(location)) {
+            imageName = "dontownla.png";
+        } else if ("Reseda".equalsIgnoreCase(location)) {
+            imageName = "reseda.png";
+        } else if ("Van Nuys".equalsIgnoreCase(location)) {
+            imageName = "vannuys.png";
+        } else if ("Northridge".equalsIgnoreCase(location)) {
+            imageName = "northridge.png";
+        }
+        java.net.URL imgUrl = getClass().getResource("/" + imageName);
+        if (imgUrl != null) {
+            ImageIcon icon = new ImageIcon(imgUrl);
+            int maxWidth = 240, maxHeight = 180;
+            int w = icon.getIconWidth();
+            int h = icon.getIconHeight();
+            double aspect = (double) w / (double) h;
+
+            int newW = maxWidth;
+            int newH = (int) (newW / aspect);
+            if (newH > maxHeight) {
+                newH = maxHeight;
+                newW = (int) (newH * aspect);
+            }
+            Image scaled = icon.getImage().getScaledInstance(newW, newH, Image.SCALE_SMOOTH);
+            imageLabel.setIcon(new ImageIcon(scaled));
+        } else {
+            imageLabel.setText("No Image");
+        }
+        centerPanel.add(imageLabel);
+        unitPanel.add(centerPanel, BorderLayout.CENTER);
+
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 10));
+        bottomPanel.setOpaque(false);
+
         if (sd.isReserved()) {
+            // Unit is reserved
             String currentUserEmail = MySQL.getEmailByUsername(myGui.getUsername());
             JLabel reservedLabel = new JLabel();
             if (MySQL.isUnitReservedByUser(sd.getId(), currentUserEmail)) {
-                // Reserved by the logged-in user: light green background.
-                unitPanel.setBackground(new Color(144, 238, 144)); // light green.
+                // Reserved by this user: light green background
+                unitPanel.setBackground(new Color(144, 238, 144));
                 reservedLabel.setText("Reserved by you");
                 reservedLabel.setForeground(Color.GREEN.darker());
             } else {
-                // Reserved by someone else: light red background.
-                unitPanel.setBackground(new Color(255, 182, 193)); // light red.
+                // Reserved by someone else: light red background
+                unitPanel.setBackground(new Color(255, 182, 193));
                 reservedLabel.setText("Reserved");
                 reservedLabel.setForeground(Color.RED);
             }
-            gbc.gridy++;
-            unitPanel.add(reservedLabel, gbc);
+            bottomPanel.add(reservedLabel);
 
-            // Add mouse listener for reserved squares.
             unitPanel.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
@@ -294,14 +344,18 @@ public class StorageGUI extends JPanel {
                 }
             });
         } else {
-            // If the unit is available, add a dedicated "Reserve" button.
+            // Unit is available, show "Reserve" button
             JButton reserveBtn = new JButton("Reserve");
             reserveBtn.addActionListener(e -> openReservationPanel(sd.getId()));
-            gbc.gridy++;
-            unitPanel.add(reserveBtn, gbc);
+            bottomPanel.add(reserveBtn);
         }
+
+        // Add the bottom panel
+        unitPanel.add(bottomPanel, BorderLayout.SOUTH);
+
         return unitPanel;
     }
+
 
     /**
      * Created by: Alexis Anguiano
