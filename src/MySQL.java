@@ -10,6 +10,25 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.util.Date;
 
+/**
+ * A) Class name: DateLabelFormatter
+ * B) Date of the Code: March 30 ,2025
+ * C) Programmer's name: William Alexis Anguiano
+ * D) Brief description: This class serves as the main data access layer for the application. It connects to a
+ * mysql database and performs operations.
+ * E) Brief explanation of important function:
+ * -getAllStorageDetails: Retrieves a full list of all storage units with reservation status.
+ * -isUser, isUsernameAndPassword: Authenticates user credentials.
+ * -insertUser,deleteUser: Creates and deletes user accounts
+ * -insertContacttInfo: Adds contact info
+ * -reserveStorageUnit, cancelReservation: Handles storage units reservation/cancelation
+ * -getUserID, getEmailByUsername: gets users info based on parameters inserted
+ * -getReservationRevenueInfo: Helper for revenue calculation
+ * F) Important data structures: StorageDetails
+ * G) Algorithm used:
+ * -Uses basic SQL query delegation via JDBC
+ * -reservation logic checks for duplicates
+ */
 
 public class MySQL {
     private static final String URL = "jdbc:mysql://caboose.proxy.rlwy.net:54157/railway";
