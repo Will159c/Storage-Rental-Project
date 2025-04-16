@@ -5,7 +5,6 @@ import java.util.Scanner;
  * (a) Module/Class Name: BrowseStorageUnits
  * (b) Date: April 15, 2025
  * (c) Programmer's Name: Juan Acevedo
- *
  * (d) Description: CLI to check the connection of the mySQL DB to check for units
  *     and reservation status
  * (e) Key Functions:
@@ -22,7 +21,6 @@ public class BrowseStorageUnits {
 
     /**
      * Launches the browsing interface for storage units.
-     * <p>
      * The menu has the options
      * - View all storage units (both reserved and available).</li>
      * - View only available storage units (non-reserved).</li>

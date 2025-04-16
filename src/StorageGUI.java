@@ -15,8 +15,8 @@ import java.util.Properties;
  * B) Date of Code: April 15, 2025,
  * C) Programmer's Name: Juan Acevedo, Alexis Anguiano
  * D) Brief Desc: StorageGUI the GUI page to display and manage storage units.
-   It displays storage units as squares with a bunch of sort options,
-   sort them by price or size, filter by location, and reserve or cancel a reservation.
+ It displays storage units as squares with a bunch of sort options,
+ sort them by price or size, filter by location, and reserve or cancel a reservation.
  * e) Brief Explanation of Important Functions:
  *    - showAllUnits: Fetches all units from the database and displays them.
  *    - showAvailableUnits: Filters and displays only non-reserved units.
@@ -72,6 +72,7 @@ public class StorageGUI extends JPanel {
 
         // Create the top panel with search and sort controls.
         JPanel topBtnPanel = new JPanel();
+        topBtnPanel.setOpaque(false);  // Make background transparent so our painted image shows through
         JButton viewAllBtn = new JButton("View All Units");
         JButton viewAvailBtn = new JButton("View Available Units");
 
@@ -96,7 +97,6 @@ public class StorageGUI extends JPanel {
         };
         JComboBox<String> sizeSortCombo = new JComboBox<>(sizeOptions);
         sizeSortCombo.addActionListener(e -> {
-            // Adjust the order as needed based on the selected index.
             if (sizeSortCombo.getSelectedIndex() == 0) {
                 showUnitsSortedBySize(false);
             } else {
@@ -138,7 +138,11 @@ public class StorageGUI extends JPanel {
         squaresPanel = new JPanel();
         squaresPanel.setLayout(new GridLayout(0, 4, 10, 10));
         squaresPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        squaresPanel.setOpaque(false);  // Allow background image to show through
+
         scrollPane = new JScrollPane(squaresPanel);
+        scrollPane.setOpaque(false);               // Make scroll pane transparent
+        scrollPane.getViewport().setOpaque(false);   // Make viewport transparent
         add(scrollPane, BorderLayout.CENTER);
 
         // Create and add the back button.
@@ -525,5 +529,18 @@ public class StorageGUI extends JPanel {
         allUnits = MySQL.getAllStorageDetails();
         showAllUnits();
         myGui.showMain("Storage Screen");
+    }
+
+    @Override
+    /**
+     * Adds the blurred background photo to keep the theme
+     */
+    protected void paintComponent(Graphics g) {
+        // First, clear the panel by letting the superclass draw its background.
+        super.paintComponent(g);
+        // Load the background image from resources. Ensure the image is in src/main/resources.
+        Image bgImg = new ImageIcon(getClass().getResource("/background_blur.jpg")).getImage();
+        // Draw the image to fill the entire panel.
+        g.drawImage(bgImg, 0, 0, getWidth(), getHeight(), this);
     }
 }
