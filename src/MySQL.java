@@ -33,7 +33,7 @@ import java.util.Date;
 public class MySQL {
     private static final String URL = "jdbc:mysql://caboose.proxy.rlwy.net:54157/railway";
     private static final String USER = "root";
-    private static final String PASSWORD = "Replace Here"; // Replace with actual password
+    private static final String PASSWORD = "replace here"; // Replace with actual password
 
     /**
      * Establishes and returns a database connection using predefined URL, user, and password.
@@ -489,18 +489,17 @@ public class MySQL {
      * @param id_user user ID
      * @param password password for verification
      * @param startDate reservation start date
-     * @param endDate reservation end date
      * @param price price of unit
      * @return true if successful false otherwise
      */
-    public static boolean reserveStorageUnit(int storageID, String email, int id_user, String password, Date startDate, Date endDate, int price) {
+    public static boolean reserveStorageUnit(int storageID, String email, int id_user, String password, Date startDate, int price) {
         if (!isEmailAndPasswordValid(email, password)) {
             System.out.println("Invalid email or password.");
             return false;
         }
 
         String checkAvailability = "SELECT * FROM storage_reservations WHERE storage_id = ?";
-        String reserveUnit = "INSERT INTO storage_reservations (storage_id, customer_email, user_id, start_date, end_date, price) VALUES (?, ?, ?, ?, ?, ?)";
+        String reserveUnit = "INSERT INTO storage_reservations (storage_id, customer_email, user_id, start_date, price) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = getConnection();
              PreparedStatement checkStmt = conn.prepareStatement(checkAvailability);
@@ -516,8 +515,7 @@ public class MySQL {
                 reserveStmt.setString(2, email);
                 reserveStmt.setInt(3, id_user);
                 reserveStmt.setDate(4, new java.sql.Date(startDate.getTime()));
-                reserveStmt.setDate(5, new java.sql.Date(endDate.getTime()));
-                reserveStmt.setInt(6, price);
+                reserveStmt.setInt(5, price);
 
                 if (reserveStmt.executeUpdate() > 0) {
                     EmailNotifier.sendEmail("storagerentalproject@gmail.com", "New Reservation",
@@ -673,8 +671,8 @@ public class MySQL {
         }
     }
 
-    public static List<Integer> getReservationRevenueInfo() { //Helper for getRevenue in AdminGUI
-        String sql = "SELECT start_date, end_date, price FROM storage_reservations";
+    public static List<Integer> getReservationRevenueInfo() {
+        String sql = "SELECT start_date, price FROM storage_reservations";
         List<Integer> storageInfo = new ArrayList<>();
 
         try (Connection conn = MySQL.getConnection();
@@ -684,19 +682,11 @@ public class MySQL {
 
             while (rs.next()) {
                 LocalDate startDate = rs.getDate("start_date").toLocalDate();
-                LocalDate endDate = rs.getDate("end_date").toLocalDate();
-
                 int price = rs.getInt("price");
 
-                long monthsBetween = ChronoUnit.MONTHS.between(
-                        startDate.withDayOfMonth(1),
-                        endDate.withDayOfMonth(1)
-                );
-
-                if (monthsBetween > 0) {
-                    storageInfo.add((int) monthsBetween);
-                    storageInfo.add(price);
-                }
+                storageInfo.add(startDate.getYear());  // Year
+                storageInfo.add(startDate.getMonthValue()); // Month
+                storageInfo.add(price);
             }
 
         } catch (Exception e) {

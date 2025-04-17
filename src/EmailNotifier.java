@@ -65,12 +65,12 @@ public class EmailNotifier {
 
     /**
      * Sends reservation confirmation email with rental info.
+     *
      * @param recipient email of customer
-     * @param unitId storage unit ID
+     * @param unitId    storage unit ID
      * @param startDate rental start date
-     * @param realEndDate rental end date
      */
-    public static void sendReservationConfirmation(String recipient, int unitId, Date startDate, Date realEndDate) {
+    public static void sendReservationConfirmation(String recipient, int unitId, Date startDate) {
         var details = MySQL.getStorageInformation(unitId);
         if (details.isEmpty()) {
             System.err.println("Failed to fetch unit info.");
@@ -94,10 +94,6 @@ public class EmailNotifier {
                 .append("Price per Month: $").append(pricePerMonth).append("\n")
                 .append("Location: ").append(location).append("\n\n")
                 .append("Start Date: ").append(fmt.format(startDate)).append("\n");
-
-        if (realEndDate != null) {
-            body.append("End Date: ").append(fmt.format(realEndDate)).append("\n");
-        }
 
         body.append("\nBilling Statement:\n")
                 .append("Rental Period: ").append(fmt.format(startDate))

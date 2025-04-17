@@ -560,9 +560,8 @@ public class StorageGUI extends JPanel {
         }
 
         Date startDate = (Date) startPicker.getModel().getValue();
-        Date endDate = (Date) endPicker.getModel().getValue();
 
-        if (startDate == null || (endDate != null && !endDate.after(startDate))) {
+        if (startDate == null) {
             JOptionPane.showMessageDialog(null, "Invalid date range", "Date Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
@@ -570,11 +569,10 @@ public class StorageGUI extends JPanel {
         Calendar c = Calendar.getInstance();
         c.setTime(startDate);
         c.add(Calendar.DATE, 30);
-        Date billEnd = c.getTime();
 
         int userID = MySQL.getUserID(myGui.getUsername());
-        MySQL.reserveStorageUnit(storageID, email, userID, password, startDate, billEnd, price);
-        EmailNotifier.sendReservationConfirmation(email, storageID, startDate, endDate);
+        MySQL.reserveStorageUnit(storageID, email, userID, password, startDate, price);
+        EmailNotifier.sendReservationConfirmation(email, storageID, startDate);
         JOptionPane.showMessageDialog(null, "Reservation successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
         allUnits = MySQL.getAllStorageDetails();
         myGui.loginUser(myGui.getUsername());

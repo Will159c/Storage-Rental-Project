@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
+import java.time.LocalDate;
 import java.util.List;
 
 public class AdminGUI extends JPanel {
@@ -63,20 +64,26 @@ public class AdminGUI extends JPanel {
         add(panel);
     }
 
-    public static int getRevenue() {  // Gets the current revenue generated altogether.
-        List<Integer> x = MySQL.getReservationRevenueInfo();
-        int totalRevenue = 0;
+    public static int getMonthlyRevenue() {  // gets the monthly revenue
+        List<Integer> reservations = MySQL.getReservationRevenueInfo();
+        int total = 0;
 
-        for (int i = 0; i < x.size(); i += 2) {
-            int months = x.get(i);
-            int pricePerMonth = x.get(i + 1);
+        LocalDate now = LocalDate.now();
+        int currentYear = now.getYear();
+        int currentMonth = now.getMonthValue();
 
-            if (months < 0) months = 0; // safety check
+        for (int i = 0; i < reservations.size(); i += 3) {
+            int year = reservations.get(i);
+            int month = reservations.get(i + 1);
+            int price = reservations.get(i + 2);
 
-            totalRevenue += months * pricePerMonth;
+            if ((year < currentYear) || (year == currentYear && month <= currentMonth)) {
+                total += price;
+            }
         }
 
-        return totalRevenue;
+        return total;
     }
+
 
 }
