@@ -5,15 +5,39 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.List;
 
+/**
+ * Admin GUI page for viewing all storage units and creating
+ * storage units.
+ */
 public class ManageStorageGUI extends JPanel {
 
     private MyGUI myGui;
+    /**
+     * An ArrayList that stores a list of all storage unit IDs, using the
+     * getStorage() method from the MySQL class.
+     */
     private static ArrayList<Integer> storageIDs;
+    /**
+     * Used for the unit details JList.
+     * Dynamically displays selected storage unit information.
+     */
     private DefaultListModel<Object> listModel;
     private JList<Integer> list;
+    private JLabel sizeValid;
+    private JLabel priceValid;
+    private JLabel locationValid;
+    private JTextField sizeTxtField;
+    private JTextField priceTxtField;
+    private JTextField locationTxtField;
 
+    /**
+     * Constructor for the ManageStorageGUI page, otherwise known as
+     * the Create Storage Unit page. Creates storage units and displays
+     * a list of all storage units and gives the ability to see each unit's
+     * details.
+     * @param myGui reference to the main GUI controller
+     */
     public ManageStorageGUI(MyGUI myGui) {
         this.myGui = myGui;
         this.storageIDs = (ArrayList<Integer>) MySQL.getStorageID();
@@ -60,13 +84,13 @@ public class ManageStorageGUI extends JPanel {
         panel.add(sizeTxt, gbc);
 
         // Set size text field
-        JTextField sizeTxtField = new JTextField(15);
+        sizeTxtField = new JTextField(15);
         gbc.gridy = 1;
         gbc.gridx = 1;
         panel.add(sizeTxtField, gbc);
 
         // Confirm size is valid
-        JLabel sizeValid = new JLabel("");
+        sizeValid = new JLabel("");
         sizeValid.setFont(new Font("SansSerif", Font.ITALIC, 10));
         sizeValid.setForeground(Color.red);
         gbc.gridy = 2;
@@ -88,14 +112,14 @@ public class ManageStorageGUI extends JPanel {
         panel.add(priceTxt, gbc);
 
         // Set price text field
-        JTextField priceTxtField = new JTextField(15);
+        priceTxtField = new JTextField(15);
         gbc.gridy = 3;
         gbc.gridx = 1;
         gbc.anchor = GridBagConstraints.WEST; // Keep this to the right
         panel.add(priceTxtField, gbc);
 
         // Confirm price is valid
-        JLabel priceValid = new JLabel("");
+        priceValid = new JLabel("");
         priceValid.setFont(new Font("SansSerif", Font.ITALIC, 10));
         priceValid.setForeground(Color.red);
         gbc.gridy = 4;
@@ -115,14 +139,14 @@ public class ManageStorageGUI extends JPanel {
         panel.add(locationTxt, gbc);
 
         // Set location text field
-        JTextField locationTxtField = new JTextField(15);
+        locationTxtField = new JTextField(15);
         gbc.gridy = 5;
         gbc.gridx = 1;
         gbc.anchor = GridBagConstraints.WEST; // Keep this to the right
         panel.add(locationTxtField, gbc);
 
         // Confirm location is valid
-        JLabel locationValid = new JLabel("");
+        locationValid = new JLabel("");
         locationValid.setFont(new Font("SansSerif", Font.ITALIC, 10));
         locationValid.setForeground(Color.red);
         gbc.gridy = 6;
@@ -214,9 +238,12 @@ public class ManageStorageGUI extends JPanel {
         list.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
-                if (!e.getValueIsAdjusting()) { // Prevents multiple events
-                    ArrayList<Object> unitDetails = new ArrayList<Object>(MySQL.getStorageInformation(list.getSelectedValue()));
-                    refreshList(unitDetails);
+                if (!e.getValueIsAdjusting()) {
+                    Integer selected = list.getSelectedValue();
+                    if (selected != null) {
+                        ArrayList<Object> unitDetails = new ArrayList<>(MySQL.getStorageInformation(selected));
+                        refreshList(unitDetails);
+                    }
                 }
             }
         });
@@ -251,58 +278,72 @@ public class ManageStorageGUI extends JPanel {
                 String location = locationTxtField.getText();
                 String price = priceTxtField.getText();
 
-                // Clear error messages
-                sizeValid.setText("");
-                priceValid.setText("");
-                locationValid.setText("");
-
-                if (validateStorage(size, location, price)) { // Create storage in system
-                    int priceInt = Integer.parseInt(price);
-                    MySQL.createNewStorageUnit(size, priceInt, location);
-
-                    // Clear error messages
-                    sizeValid.setText("");
-                    priceValid.setText("");
-                    locationValid.setText("");
-
-                    // Clear textfields
-                    sizeTxtField.setText("");
-                    priceTxtField.setText("");
-                    locationTxtField.setText("");
-
-                    refreshStorageList();
-
-                    // Pop up window for success
-                    JOptionPane.showMessageDialog(null, "Storage Unit Created", "", JOptionPane.INFORMATION_MESSAGE);
-
-                    // Return to admin page
-                    myGui.showMain("Admin Screen");
-                }
-                else {
-                        if (size.isEmpty()) {
-                            sizeValid.setText("Enter a size");
-                        }
-                        if (location.isEmpty()) {
-                            locationValid.setText("Enter a location");
-                        }
-                        if(price.isEmpty()) {
-                            priceValid.setText("Enter price");
-                        }
-                        else {
-                            try {
-                                Integer.parseInt(price);
-                            } catch (NumberFormatException ex) {
-                                priceValid.setText("Enter valid price");
-                            }
-                        }
-                    }
-                }
+                createStorageUnit(size, location, price);
+            }
         });
 
         add(wrapper, gbc);
     }
 
-    public static boolean validateStorage(String size, String location, String price) {
+    /**
+     * Handles the creation of a new storage unit given the admin's input.
+     * Validates input and updates the database to include the new storage unit.
+     * @param size the size of the storage unit
+     * @param location the location of the storage unit
+     * @param price the price of the storage unit set as a string
+     */
+    private void createStorageUnit(String size, String location, String price) {
+        // Clear error messages
+        sizeValid.setText("");
+        priceValid.setText("");
+        locationValid.setText("");
+
+        if (validateStorage(size, location, price)) { // Create storage in system
+            int priceInt = Integer.parseInt(price);
+            MySQL.createNewStorageUnit(size, priceInt, location);
+
+            // Clear textfields
+            sizeTxtField.setText("");
+            priceTxtField.setText("");
+            locationTxtField.setText("");
+
+            refreshStorageList();
+
+            // Pop up window for success
+            JOptionPane.showMessageDialog(null, "Storage Unit Created", "", JOptionPane.INFORMATION_MESSAGE);
+
+            // Return to admin page
+            myGui.showMain("Admin Screen");
+        }
+        else {
+            if (size.isEmpty()) {
+                sizeValid.setText("Enter a size");
+            }
+            if (location.isEmpty()) {
+                locationValid.setText("Enter a location");
+            }
+            if(price.isEmpty()) {
+                priceValid.setText("Enter price");
+            }
+            else {
+                try {
+                    Integer.parseInt(price);
+                } catch (NumberFormatException ex) {
+                    priceValid.setText("Enter valid price");
+                }
+            }
+        }
+    }
+
+    /**
+     * Helper method for validating the input given when creating a
+     * storage unit.
+     * @param size given size of the unit
+     * @param location given location of the unit
+     * @param price given price of the unit
+     * @return true if all inputs are valid, otherwise false
+     */
+    private boolean validateStorage(String size, String location, String price) {
 
         if (size.isEmpty()) {
             return false;
@@ -322,6 +363,11 @@ public class ManageStorageGUI extends JPanel {
         return true;
     }
 
+    /**
+     * Updates the unit details after selecting it from the
+     * storage unit list.
+     * @param unitDetails the list of storage unit details
+     */
     private void refreshList(ArrayList<Object> unitDetails) {
         listModel.clear();
         for (Object obj : unitDetails) {
@@ -329,6 +375,10 @@ public class ManageStorageGUI extends JPanel {
         }
     }
 
+    /**
+     * Refreshes the list of storage units after successfully creating
+     * a new unit.
+     */
     public void refreshStorageList() { // Refresh page upon entering for updated Storage Units
         storageIDs = (ArrayList<Integer>) MySQL.getStorageID();
         list.setListData(storageIDs.toArray(new Integer[0]));

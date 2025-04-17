@@ -3,9 +3,25 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+/**
+ * Admin page for the GUI for managing users.
+ * Admin is able to delete users from the database or update their email addresses.
+ */
 public class ManageUsersGUI extends JPanel {
     private MyGUI myGui;
+    private JLabel deleteUserError;
+    private JLabel userEmailError;
+    private JLabel emailError;
+    private JTextField deleteUserTxtField;
+    private JTextField userEmailTxtField;
+    private JTextField emailTxtField;
 
+    /**
+     * Constructs ManageUsersGUI where the administrator can
+     * update email addresses for users or delete users. Includes
+     * text fields, buttons, and labels to accomplish this.
+     * @param myGUI reference to the main GUI controller
+     */
     public ManageUsersGUI(MyGUI myGUI) {
         this.myGui = myGUI;
         setLayout(new GridBagLayout());
@@ -47,13 +63,13 @@ public class ManageUsersGUI extends JPanel {
         panel.add(deleteUserTxt, gbc);
 
         // Username text field for deletion
-        JTextField deleteUserTxtField = new JTextField(15);
+        deleteUserTxtField = new JTextField(15);
         gbc.gridy = 2;
         gbc.gridx = 1;
         panel.add(deleteUserTxtField, gbc);
 
         // Error message for deleting user
-        JLabel deleteUserError = new JLabel("");
+        deleteUserError = new JLabel("");
         deleteUserError.setFont(new Font("SansSerif", Font.ITALIC, 10));
         deleteUserError.setForeground(Color.red);
         gbc.gridy = 3;
@@ -90,13 +106,13 @@ public class ManageUsersGUI extends JPanel {
         panel.add(userEmailTxt, gbc);
 
         // Username text field for email update
-        JTextField userEmailTxtField = new JTextField(15);
+        userEmailTxtField = new JTextField(15);
         gbc.gridy = 6;
         gbc.gridx = 1;
         panel.add(userEmailTxtField, gbc);
 
         // Error message for username entered (update email)
-        JLabel userEmailError = new JLabel("");
+        userEmailError = new JLabel("");
         userEmailError.setFont(new Font("SansSerif", Font.ITALIC, 10));
         userEmailError.setForeground(Color.red);
         gbc.gridy = 7;
@@ -115,13 +131,13 @@ public class ManageUsersGUI extends JPanel {
         panel.add(emailTxt, gbc);
 
         // Email text field for email update
-        JTextField emailTxtField = new JTextField(15);
+        emailTxtField = new JTextField(15);
         gbc.gridy = 8;
         gbc.gridx = 1;
         panel.add(emailTxtField, gbc);
 
         // Error message for email entered (update email)
-        JLabel emailError = new JLabel("");
+        emailError = new JLabel("");
         emailError.setFont(new Font("SansSerif", Font.ITALIC, 10));
         emailError.setForeground(Color.red);
         gbc.gridy = 9;
@@ -156,79 +172,112 @@ public class ManageUsersGUI extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 String user = deleteUserTxtField.getText();
 
-                // Clear error messages
-                deleteUserError.setText("");
-                userEmailError.setText("");
-                emailError.setText("");
-
-                if (MySQL.isUser(user)) { // Delete the user
-                    // Delete user
-                    MySQL.deleteUser(user);
-
-                    // Clear text fields
-                    deleteUserTxtField.setText("");
-                    userEmailTxtField.setText("");
-                    emailTxtField.setText("");
-
-                    // Pop up window for success
-                    JOptionPane.showMessageDialog(null, "User Deleted", "", JOptionPane.INFORMATION_MESSAGE);
-
-                    // Return to Admin page
-                    myGui.showMain("Admin Screen");
-                }
-                else { // Display error message
-                    deleteUserError.setText("User does not exist");
-                }
+                handleUserDeletion(user);
             }
         });
 
+        // Update user email button functionality
         updateEmailButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String user = userEmailTxtField.getText();
                 String email = emailTxtField.getText();
 
-                // Clear error messages
-                deleteUserError.setText("");
-                userEmailError.setText("");
-                emailError.setText("");
-
-                if(validateEmailUpdate(user, email)) {
-                    // Update user email
-                    MySQL.setEmail(user, email);
-
-                    // Clear text fields
-                    deleteUserTxtField.setText("");
-                    userEmailTxtField.setText("");
-                    emailTxtField.setText("");
-
-                    // Pop up window for success
-                    JOptionPane.showMessageDialog(null, "User Email Updated", "", JOptionPane.INFORMATION_MESSAGE);
-
-                    // Return to Admin page
-                    myGui.showMain("Admin Screen");
-                }
-                else {
-                    if (!MySQL.isUser(user)) { // If user is not in database, return false
-                        userEmailError.setText("Username does not exist");
-                    }
-                    if (user.isEmpty()) {
-                        userEmailError.setText("Please enter a username");
-                    }
-                    if (MySQL.isEmail(email)) { // If email is already in use, return false
-                        emailError.setText("Email is already in use");
-                    }
-                    if (email.isEmpty()) {
-                        emailError.setText("Please enter an email address");
-                    }
-                }
+                handleEmailUpdate(user, email);
             }
         });
 
         add(panel);
     }
 
-    public static boolean validateEmailUpdate(String user, String email) {
+    /**
+     * Handles user deletion from the database by taking in the
+     * username, confirming user is in the database, then updating
+     * the database with the user's removal. Displays confirmation
+     * dialog box upon success or an error message is user is not
+     * in the database.
+     * @param user the username to delete
+     */
+    private void handleUserDeletion(String user) {
+        // Clear error messages
+        deleteUserError.setText("");
+        userEmailError.setText("");
+        emailError.setText("");
+
+        if (MySQL.isUser(user)) { // Delete the user
+            // Delete user
+            MySQL.deleteUser(user);
+
+            // Clear text fields
+            deleteUserTxtField.setText("");
+            userEmailTxtField.setText("");
+            emailTxtField.setText("");
+
+            // Pop up window for success
+            JOptionPane.showMessageDialog(null, "User Deleted", "", JOptionPane.INFORMATION_MESSAGE);
+
+            // Return to Admin page
+            myGui.showMain("Admin Screen");
+        }
+        else { // Display error message
+            deleteUserError.setText("User does not exist");
+        }
+    }
+
+    /**
+     * Handles user email address update. Validates the information
+     * given and updates the database with the user's new email address.
+     *
+     * @param user the username to update
+     * @param email the new email address
+     */
+    private void handleEmailUpdate(String user, String email) {
+        // Clear error messages
+        deleteUserError.setText("");
+        userEmailError.setText("");
+        emailError.setText("");
+
+        if(validateEmailUpdate(user, email)) {
+            // Update user email
+            MySQL.setEmail(user, email);
+
+            // Clear text fields
+            deleteUserTxtField.setText("");
+            userEmailTxtField.setText("");
+            emailTxtField.setText("");
+
+            // Pop up window for success
+            JOptionPane.showMessageDialog(null, "User Email Updated", "", JOptionPane.INFORMATION_MESSAGE);
+
+            // Return to Admin page
+            myGui.showMain("Admin Screen");
+        }
+        else {
+            if (!MySQL.isUser(user)) { // If user is not in database, return false
+                userEmailError.setText("Username does not exist");
+            }
+            if (user.isEmpty()) {
+                userEmailError.setText("Please enter a username");
+            }
+            if (MySQL.isEmail(email)) { // If email is already in use, return false
+                emailError.setText("Email is already in use");
+            }
+            if (email.isEmpty()) {
+                emailError.setText("Please enter an email address");
+            }
+        }
+    }
+
+    /**
+     * Checks whether given username or email are valid
+     * credentials in database. Checks if username is in the
+     * database, if the email is already in use, or whether
+     * the text fields are empty.
+     * @param user the username to validate
+     * @param email the email to validate
+     * @return true if the credentials are valid, false otherwise
+     */
+    private boolean validateEmailUpdate(String user, String email) {
 
         if (!MySQL.isUser(user)) { // If user is not in database, return false
             return false;

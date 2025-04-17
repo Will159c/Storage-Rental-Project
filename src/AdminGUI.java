@@ -3,13 +3,25 @@ import java.awt.*;
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * The Admin page that provides a way for the admin to navigate
+ * through and create storage units or manage users. Displays the
+ * total monthly and overall revenue and a way to return to the main
+ * menu.
+ */
 public class AdminGUI extends JPanel {
     private MyGUI myGui;
 
+    /**
+     * Constructs the admin screen with the navigation
+     * buttons and displays the total and monthly revenues.
+     * @param myGui Reference to the main GUI controller for navigation
+     */
     public AdminGUI(MyGUI myGui) {
         this.myGui = myGui; // Save reference
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints(); // Allows for ordered positioning
+        String monthlyRevenue = "Total Monthly Revenue: $" + Integer.toString(getMonthlyRevenue());
 
         // Create a panel with GridBagLayout
         JPanel panel = new JPanel(new GridBagLayout());
@@ -60,10 +72,23 @@ public class AdminGUI extends JPanel {
         // Go to manage user screen
         userButton.addActionListener(e -> myGui.showMain("Manage User Screen"));
 
+        // Show revenue: Labels
+        JLabel revenueLabel = new JLabel(monthlyRevenue, SwingConstants.CENTER);
+        revenueLabel.setFont(new Font("SansSerif", Font.BOLD, 20));
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        gbc.gridwidth = 1; // Ensure label spans both columns
+        gbc.anchor = GridBagConstraints.CENTER;
+        panel.add(revenueLabel, gbc);
+
         // Add panel to AdminGUI
         add(panel);
     }
 
+    /**
+     * Calculates the total revenue based on storage reservations.
+     * @return the monthly revenue
+     */
     public static int getMonthlyRevenue() {  // gets the monthly revenue
         List<Integer> reservations = MySQL.getReservationRevenueInfo();
         int total = 0;
