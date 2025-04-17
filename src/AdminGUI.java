@@ -4,10 +4,19 @@ import java.time.LocalDate;
 import java.util.List;
 
 /**
- * The Admin page that provides a way for the admin to navigate
+ * a) Class Name: AdminGUI
+ * b) Date of the Code: March 17, 2025
+ * c) Programmers Names: Miguel Sicaja, William Woodruff
+ * d) Brief description: The Admin page that provides a way for the admin to navigate
  * through and create storage units or manage users. Displays the
  * total monthly and overall revenue and a way to return to the main
  * menu.
+ * e) Brief explanation of important functions:
+ * - getMonthlyRevenue: Gets the total revenue received per month
+ * f) Important Data Structures:
+ * - MySQL: Provides means of checking monthly revenue
+ * g) Algorithms used:
+ * - Uses a basic UI logic algorithm to control page navigation through MyGUI
  */
 public class AdminGUI extends JPanel {
     private MyGUI myGui;
