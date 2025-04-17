@@ -4,9 +4,21 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
- * GUI for the user to cancel their reservation for a storage
+ * a) Class Name: CancelGUI
+ * b) Date of the Code: April 5, 2025
+ * c) Programmers Names: Miguel Sicaja, Alexis Anguiano
+ * d) Brief description: GUI for the user to cancel their reservation for a storage
  * unit. Necessitates the user to verify their credentials and
  * confirm cancellation.
+ * e) Brief explanation of important functions:
+ * - cancelUnit: cancels the reservation of a storage unit, provided user enters
+ *   correct password
+ * - cancelValidation: Checks to see if username and provided password match
+ * f) Important Data Structures:
+ * - MySQL: Allows for checking if user credentials are correct and updates the storage
+ *   unit to be unreserved in the database.
+ * g) Algorithms used:
+ * - Uses basic algorithm to handle storage unit reservation cancellation and password check.
  */
 public class CancelGUI extends JPanel {
 
