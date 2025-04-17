@@ -4,14 +4,25 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
- * GUI page for user registration.
- *
- * Displays the labels for the username, email, password,
+ * a) Class Name: RegisterGUI
+ * b) Date of the Code: March 2, 2025
+ * c) Programmers Names: Miguel Sicaja
+ * d) Brief description: Displays the labels for the username, email, password,
  * and confirmation password along with their designated
  * text fields. Performs a validation check and inserts
- * the new user into the database if check passes. Returns
+ * the new user into the database if all checks passes. Returns
  * to the main menu if user is successfully created, or shows
  * error messages if one or more checks fail.
+ * e) Brief explanation of important functions:
+ * - handleRegistration: Registers new user to database if all validation checks pass,
+ *   otherwise gives error messages
+ * - validate: checks whether given user input is valid or not
+ * f) Important Data Structures:
+ * - MySQL: Provides means of checking if input is valid to enter into the database. Also
+ *   adds new user to the database
+ * g) Algorithms used:
+ * - Uses basic logic algorithm to validate user input, insert new user into database, or
+ *   send error messages
  */
 public class RegisterGUI extends JPanel {
 
