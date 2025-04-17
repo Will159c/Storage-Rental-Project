@@ -2,9 +2,24 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * This class is is the setup for the overall GUI. It holds the pages for the other GUI classes,
+ * a) Class Name: MyGUI
+ * b) Date of the Code: February 23, 2025
+ * c) Programmers Names: Miguel Sicaja, Alexis Anguiano
+ * d) Brief description: This class is the setup for the overall GUI. It holds the pages for the other GUI classes,
  * initializes them, and controls the navigation between pages. It allows the other pages to transfer
  * information between one another.
+ * e) Brief explanation of important functions:
+ * - welcomeScreen: Creates the welcome screen panel, allowing the user to login or register using buttons.
+ * - showMain: Allows the switching between panels to different screens like the registration screen or login screen
+ * - addPanel: adds JPanel to StorageGUI, the reservation page
+ * - setUsername: Set's the username of the logged-in user
+ * - getUsername: Gets the username
+ * - loginUser: allows for the user's information to be transferred to user page
+ * - toCancellation: Allows the user to go to the cancellation page and transfer appropriate data
+ * f) Important Data Structures:
+ * - None
+ * g) Algorithms used:
+ * - Uses a basic UI logic algorithm to control page navigation and update states based on the user's actions
  */
 public class MyGUI {
 
