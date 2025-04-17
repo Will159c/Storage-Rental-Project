@@ -6,16 +6,34 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
+/**
+ * The User page after login. Displays the storage units the user
+ * has reserved, as well as the unit details when clicking a unit,
+ * the ability to cancel reservations, and the ability to navigate
+ * to the reservation page.
+ */
 public class UserGUI extends JPanel {
 
     private MyGUI myGui;
     private JLabel titleTxt;
+    private JLabel cancelError;
     private String username;
-    private String email;
-    private String password;
+    /**
+     * An ArrayList that stores a list of reserved storage unit IDs, using the
+     * getUserReservations() method from the MySQL class.
+     */
     private static ArrayList<Integer> storageIDs;
+    /**
+     * Used for the unit details JList.
+     * Dynamically displays selected storage unit information.
+     */
     private DefaultListModel<Object> listModel;
 
+    /**
+     * Constructs the user page and initializes the GUI components.
+     * @param myGUI reference to the main GUI controller
+     * @param username the logged-in user's username
+     */
     public UserGUI(MyGUI myGUI, String username) {
         this.myGui = myGUI;
         this.listModel = new DefaultListModel<>();
@@ -170,7 +188,7 @@ public class UserGUI extends JPanel {
         panel.add(cancelButton, gbc);
 
         // Error message for canceling reservation
-        JLabel cancelError = new JLabel("");
+        cancelError = new JLabel("");
         cancelError.setFont(new Font("SansSerif", Font.ITALIC, 12));
         cancelError.setOpaque(true); // Allow for background of border to be colored
         cancelError.setBackground(Color.BLACK); // Set background border color
@@ -186,14 +204,7 @@ public class UserGUI extends JPanel {
         cancelButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (currStorage[0] == null) {
-                    cancelError.setText("Please choose a Storage Unit");
-                }
-                else {
-                    cancelError.setText("");
-
-                    myGui.toCancellation(username, currStorage[0]);
-                }
+                handleCancellation(currStorage[0]);
             }
         });
 
@@ -222,6 +233,27 @@ public class UserGUI extends JPanel {
         add(background, BorderLayout.CENTER);
     }
 
+    /**
+     * Navigates user to cancellation page if valid storage unit is selected,
+     * otherwise gives an error message.
+     * @param unit the selected storage unit for reservation cancellation
+     */
+    private void handleCancellation(Integer unit) {
+        if (unit == null) {
+            cancelError.setText("Please choose a Storage Unit");
+        }
+        else {
+            cancelError.setText("");
+
+            myGui.toCancellation(username, unit);
+        }
+    }
+
+    /**
+     * Refreshes the displayed unit details when the user selects a storage
+     * unit.
+     * @param unitDetails the list of details for the storage unit
+     */
     private void refreshList(ArrayList<Object> unitDetails) {
         listModel.clear();
         for (Object obj : unitDetails) {

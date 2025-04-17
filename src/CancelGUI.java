@@ -3,11 +3,27 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+/**
+ * GUI for the user to cancel their reservation for a storage
+ * unit. Necessitates the user to verify their credentials and
+ * confirm cancellation.
+ */
 public class CancelGUI extends JPanel {
 
     private MyGUI myGui;
     private String username;
     private int id;
+    private JLabel credentialsValid;
+
+    /**
+     * Constructs the cancellation page. Contains a field for
+     * the user to reenter their password and confirm their
+     * cancellation. If the user wishes they can return to
+     * the user menu.
+     * @param myGUI reference to the main GUI controller
+     * @param username the user's username
+     * @param id the ID of the storage unit to cancel
+     */
     public CancelGUI(MyGUI myGUI, String username, int id) {
         this.myGui = myGUI;
         this.username = username;
@@ -62,7 +78,7 @@ public class CancelGUI extends JPanel {
         panel.add(emailLabel, gbc);
 
         // Credentials validation message
-        JLabel credentialsValid = new JLabel("");
+        credentialsValid = new JLabel("");
         credentialsValid.setFont(new Font("SansSerif", Font.ITALIC, 10));
         credentialsValid.setOpaque(true); // Allow for background of border to be colored
         credentialsValid.setBackground(Color.BLACK); // Set background border color
@@ -123,34 +139,51 @@ public class CancelGUI extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 String email = emailLabel.getText();
                 String password = String.valueOf(passTxt.getPassword());
-                if (cancelValidation(username, email, password)) {
-                    credentialsValid.setText("");
-                    // Success message
-                    JOptionPane.showMessageDialog(null, "Reservation Cancelled", "", JOptionPane.INFORMATION_MESSAGE);
 
-                    // Cancel reservation
-                    MySQL.cancelReservation(id, email, password);
-
-                    myGui.loginUser(username);
-                }
-                else {
-                    credentialsValid.setText("Incorrect credentials");
-                }
+                cancelUnit(password, email);
             }
         });
 
         add(panel, BorderLayout.CENTER);
     }
 
-    public static boolean cancelValidation(String user, String email, String password) {
-        String realEmail = MySQL.getEmailByUsername(user);
+    /**
+     * Cancels the reservation for the selected storage unit if the correct
+     * password is given. If successful, dialog box pops up confirming the
+     * cancellation or an error message appears if incorrect password is
+     * given.
+     * @param password the user's password
+     * @param email the user's email
+     */
+    private void cancelUnit(String password, String email) {
+        if (cancelValidation(username, password)) {
+            credentialsValid.setText("");
+            // Success message
+            JOptionPane.showMessageDialog(null, "Reservation Cancelled", "", JOptionPane.INFORMATION_MESSAGE);
+
+            // Cancel reservation
+            MySQL.cancelReservation(id, email, password);
+
+            myGui.loginUser(username);
+        }
+        else {
+            credentialsValid.setText("Incorrect credentials");
+        }
+    }
+
+    /**
+     * Validates whether the username and given password match in the
+     * database.
+     * @param user the username
+     * @param password the given password
+     * @return true is credentials are valid, false otherwise
+     */
+    private boolean cancelValidation(String user, String password) {
 
         if (!MySQL.isUsernameAndPassword(user, password)) {
             return false;
         }
-        if (!email.equals(realEmail)) {
-            return false;
-        }
+
         return true;
     }
 }
