@@ -7,10 +7,24 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
 /**
- * The User page after login. Displays the storage units the user
+ * a) Class Name: UserGUI
+ * b) Date of the Code: April 5, 2025
+ * c) Programmers Names: Miguel Sicaja
+ * d) Brief description: The User page after login. Displays the storage units the user
  * has reserved, as well as the unit details when clicking a unit,
  * the ability to cancel reservations, and the ability to navigate
  * to the reservation page.
+ * e) Brief explanation of important functions:
+ * - handleCancellation: Allows the transfer of storage ID and username to the cancellation page
+ * - refreshList: Updates the unit details after selecting it from the
+ * storage unit list.
+ * f) Important Data Structures:
+ * - MySQL: Allows for the retrieval of the username and storage unit ID, along with displaying
+ *   the user's reserved units
+ * g) Algorithms used:
+ * - Uses basic algorithm to navigate and transfer data to cancellation page
+ * - Uses lists such as ArrayList and DefaultListModel to display user's reserved storage units
+ *   and their details
  */
 public class UserGUI extends JPanel {
 
