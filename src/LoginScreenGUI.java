@@ -2,9 +2,19 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * The login screen panel that allows the user to login as the admin or regular
+ * a) Class Name: LoginScreenGUI
+ * b) Date of the Code: March 2, 2025
+ * c) Programmers Names: Miguel Sicaja
+ * d) Brief description: The login screen panel that allows the user to login as the admin or regular
  * user, provided they give the correct credentials. Handles the user input, basic authentication,
  * and navigation to the admin page, user page, or welcome screen.
+ * e) Brief explanation of important functions:
+ * - loginHandler: Verifies if user input is valid. If valid, logs user in as a user or admin. Otherwise,
+ * gives an error message.
+ * f) Important Data Structures:
+ * - MySQL: Provides means of checking if user credentials are valid or not
+ * g) Algorithms used:
+ * - Uses basic logical algorithm to validate user credentials and handle login.
  */
 public class LoginScreenGUI extends JPanel {
 
