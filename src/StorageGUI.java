@@ -367,7 +367,7 @@ public class StorageGUI extends JPanel {
      */
     private void openReservationPanel(int storageID) {
         boolean reserved = MySQL.isUnitReserved(storageID);
-        JPanel panel = new JPanel(new GridBagLayout());
+        JPanel panel = new BackgroundSetter("/background_blur.jpg", new GridBagLayout());
         GridBagConstraints gbc = baseGBC();
 
         String email = MySQL.getEmailByUsername(myGui.getUsername());
