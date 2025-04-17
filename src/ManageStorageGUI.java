@@ -7,8 +7,25 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
 /**
- * Admin GUI page for viewing all storage units and creating
+ * a) Class Name: ManageStorageGUI
+ * b) Date of the Code: March 19, 2025
+ * c) Programmers Names: Miguel Sicaja
+ * d) Brief description: Admin GUI page for viewing all storage units and creating
  * storage units.
+ * e) Brief explanation of important functions:
+ * - createStorageUnit: Creates new storage unit into database if the provided input is valid
+ * - validateStorage: Checks if the provided input is valid
+ * - refreshList: Updates the unit details after selecting it from the
+ * storage unit list.
+ * - refreshStorageList: Allows for the list of all storage units to be
+ * updated to include new created storage unit
+ * f) Important Data Structures:
+ * - MySQL: Allows for the list of storage units, storage unit details, checks of admin input,
+ * and insertion of new unit to be implemented into the database
+ * g) Algorithms used:
+ * - Uses basic algorithm to check if admin input is valid and insert a new storage unit into the
+ * database
+ * - Uses lists such as ArrayList and DefaultListModel to display all storage units and their details
  */
 public class ManageStorageGUI extends JPanel {
 
