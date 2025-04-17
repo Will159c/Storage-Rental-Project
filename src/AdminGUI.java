@@ -86,22 +86,29 @@ public class AdminGUI extends JPanel {
     }
 
     /**
-     * Calculates the total revenue based on storage reservations.
-     * @return the monthly revenue
+     * Created by: Will Woodruff
+     * Calculates the total revenue for all storage reservations up to and including the current month.
+     * Each reservation contributes its price to the total if it falls within or before the current month/year.
+     *
+     * @return the total monthly revenue
      */
-    public static int getMonthlyRevenue() {  // gets the monthly revenue
+    public static int getMonthlyRevenue() {
+        // Retrieve reservation data: [year, month, price] triplets
         List<Integer> reservations = MySQL.getReservationRevenueInfo();
         int total = 0;
 
+        // Get the current year and month
         LocalDate now = LocalDate.now();
         int currentYear = now.getYear();
         int currentMonth = now.getMonthValue();
 
+        // Iterate through reservation entries in sets of three (year, month, price)
         for (int i = 0; i < reservations.size(); i += 3) {
             int year = reservations.get(i);
             int month = reservations.get(i + 1);
             int price = reservations.get(i + 2);
 
+            // Include the reservation in total if it's from this month or earlier
             if ((year < currentYear) || (year == currentYear && month <= currentMonth)) {
                 total += price;
             }

@@ -142,15 +142,26 @@ public class MySQL {
     }
 
 
-    public static boolean isUser(String username) { //returns true if the given string username already exists
+    /**
+     * Created by: Will Woodruff
+     * Checks if a user with the given username already exists in the database.
+     *
+     * @param username the username to check for existence
+     * @return true if the username exists, false otherwise
+     */
+    public static boolean isUser(String username) {
+        // SQL query that returns true if a row with the given username exists
         String checkIfUsernameExists = "SELECT EXISTS (SELECT 1 FROM users WHERE username = ?)";
 
         try (Connection conn = MySQL.getConnection();
              PreparedStatement stmt = conn.prepareStatement(checkIfUsernameExists)) {
 
+            // Set the username parameter in the query
             stmt.setString(1, username);
 
+            // Execute the query and retrieve the result
             try (ResultSet rs = stmt.executeQuery()) {
+                // Return the boolean result from the query (true if exists, false otherwise)
                 if (rs.next()) {
                     return rs.getBoolean(1);
                 } else {
@@ -158,20 +169,32 @@ public class MySQL {
                 }
             }
         } catch (SQLException e) {
+            // Wrap any SQL exception into a runtime exception
             throw new RuntimeException(e);
         }
-
     }
 
-    public static boolean isUsernameAndPassword(String username, String password) { // returns true if the username and password are correct.
+
+    /**
+     * Created by: Will Woodruff
+     * Verifies if a user exists with the given username and password combination.
+     *
+     * @param username the username to authenticate
+     * @param password the corresponding password
+     * @return true if the username and password match a user in the database, false otherwise
+     */
+    public static boolean isUsernameAndPassword(String username, String password) {
+        // SQL query to check if a user exists with the provided username and password
         String checkIfUserCorrect = "SELECT EXISTS (SELECT 1 FROM users WHERE username = ? AND password = ?)";
 
         try (Connection conn = MySQL.getConnection();
              PreparedStatement stmt = conn.prepareStatement(checkIfUserCorrect)) {
 
+            // Bind the username and password to the prepared statement
             stmt.setString(1, username);
             stmt.setString(2, password);
 
+            // Execute the query and check if a matching user was found
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     return rs.getBoolean(1);
@@ -180,31 +203,46 @@ public class MySQL {
                 }
             }
         } catch (SQLException e) {
+            // Rethrow any SQL exceptions as runtime exceptions
             throw new RuntimeException(e);
         }
     }
 
-    public static void insertUser(String username, String password, String email) { //this inserts a new user into the database
+
+    /**
+     * Created by: Will Woodruff
+     * Sends a POST request to the backend API to insert a new user into the database.
+     *
+     * @param username the username of the new user
+     * @param password the password for the new user
+     * @param email the email address of the new user
+     */
+    public static void insertUser(String username, String password, String email) {
         try {
+            // Set up the connection to the API endpoint
             URL url = new URL("http://localhost:8080/api/users");
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("POST");
             con.setRequestProperty("Content-Type", "application/json");
             con.setDoOutput(true);
 
+            // Create the JSON payload to send in the request body
             String jsonInputString = String.format(
                     "{\"username\":\"%s\", \"email\":\"%s\", \"password\":\"%s\"}",
                     username, email, password
             );
 
+            // Write the JSON data to the output stream
             try (OutputStream os = con.getOutputStream()) {
                 byte[] input = jsonInputString.getBytes("utf-8");
                 os.write(input, 0, input.length);
             }
 
+            // Get and print the response code from the server
             int code = con.getResponseCode();
             System.out.println("Response Code: " + code);
 
+            // Check if the user creation was successful
             if (code == 200 || code == 201) {
                 System.out.println("User created successfully.");
             } else {
@@ -212,9 +250,11 @@ public class MySQL {
             }
 
         } catch (Exception e) {
+            // Print any exceptions that occur during the request
             e.printStackTrace();
         }
     }
+
 
 
 //    public static void insertUser(String username, String password, String email) { //old insertUser method. Updated API method above.
@@ -234,23 +274,43 @@ public class MySQL {
 //        }
 //    }
 
-    public static void insertContactInfo(String email, String phoneNumber) { //this inserts a new contactInfo into the database
+    /**
+     * Created by: Will Woodruff
+     * Inserts a new contact information record into the database.
+     *
+     * @param email the user's email address
+     * @param phoneNumber the user's phone number
+     */
+    public static void insertContactInfo(String email, String phoneNumber) {
+        // SQL statement to insert a new row into the contactInfo table
         String sql = "INSERT INTO contactInfo (Email, PhoneNumber) VALUES (?, ?)";
 
         try (Connection conn = MySQL.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
+            // Set the email and phone number parameters in the SQL statement
             stmt.setString(1, email);
             stmt.setString(2, phoneNumber);
+
+            // Execute the insert operation
             stmt.executeUpdate();
             System.out.println("Contact Info Added!");
 
         } catch (SQLException e) {
+            // Rethrow any SQL exceptions as runtime exceptions
             throw new RuntimeException(e);
         }
     }
 
-    private static List<String> getContactEmails() {  // Gets all the emails inside of the contactInfo table and puts them into a String list
+
+    /**
+     * Created by: Will Woodruff
+     * Retrieves all email addresses from the contactInfo table.
+     *
+     * @return a list of email strings found in the contactInfo table
+     */
+    private static List<String> getContactEmails() {
+        // SQL query to select all records from the contactInfo table
         String sql = "SELECT * FROM contactInfo";
         List<String> emails = new ArrayList<>();
 
@@ -258,49 +318,76 @@ public class MySQL {
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
+            // Iterate through the result set and add each email to the list
             while (rs.next()) {
                 emails.add(rs.getString("Email"));
             }
 
         } catch (Exception e) {
+            // Wrap and rethrow any exceptions as runtime exceptions
             throw new RuntimeException(e);
         }
+
         return emails;
     }
 
-    public static void printContactInfo() { // Prints all the contact information available.
+
+    /**
+     * Created by: Will Woodruff
+     * Prints all contact information (phone numbers and emails) from the database.
+     */
+    public static void printContactInfo() {
+        // Retrieve all phone numbers and emails from the database
         List<String> phoneNumber = getContactNumbers();
         List<String> emails = getContactEmails();
 
-        // Print phone numbers
+        // Print all phone numbers
         System.out.println("Phone Numbers:");
         for (String s : phoneNumber) {
             System.out.println(s);
         }
 
-        // Print emails
+        // Print all email addresses
         System.out.println("\nEmails:");
         for (String email : emails) {
             System.out.println(email);
         }
-
     }
 
-    public static List<String> getContactInformation() { //puts all contactInformation into a single List and returns it
+
+    /**
+     * Created by: Will Woodruff
+     * Retrieves all contact information (phone numbers and emails) and combines them into a single list.
+     *
+     * @return a list containing all phone numbers followed by all emails
+     */
+    public static List<String> getContactInformation() {
+        // Get phone numbers and emails from the database
         List<String> phoneNumber = getContactNumbers();
         List<String> emails = getContactEmails();
 
+        // Create a list to store all contact information
         List<String> contactInformation = new ArrayList<>();
 
+        // Add phone numbers first
         contactInformation.addAll(phoneNumber);
 
+        // Add emails afterward
         contactInformation.addAll(emails);
 
         return contactInformation;
     }
 
 
-    private static List<String> getContactNumbers() {  // Gets all the numbers inside of the contactInfo table and puts them into a String List
+
+    /**
+     * Created by: Will Woodruff
+     * Retrieves all phone numbers from the contactInfo table and stores them in a list.
+     *
+     * @return a list of phone numbers found in the contactInfo table
+     */
+    private static List<String> getContactNumbers() {
+        // SQL query to select all records from the contactInfo table
         String sql = "SELECT * FROM contactInfo";
         List<String> phoneNumbers = new ArrayList<>();
 
@@ -308,18 +395,33 @@ public class MySQL {
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
+            // Iterate through the result set and add each phone number to the list
             while (rs.next()) {
                 phoneNumbers.add(rs.getString("PhoneNumber"));
             }
 
         } catch (Exception e) {
+            // Wrap and rethrow any exceptions as runtime exceptions
             throw new RuntimeException(e);
         }
+
         return phoneNumbers;
     }
 
-    public static void setEmail(String username, String email) { //checks if the given email already is connected, if not it connects the email to the given user overriding information aswell
+
+    /**
+     * Created by: Will Woodruff
+     * Updates the email address associated with the given username.
+     * If the email is already linked to another user, the update is aborted.
+     *
+     * @param username the username whose email is to be set
+     * @param email the new email to assign to the user
+     */
+    public static void setEmail(String username, String email) {
+        // SQL query to update the email for a specific username
         String sql = "UPDATE users SET email = ? WHERE username = ?";
+
+        // Check if the email is already associated with an existing user
         if (isEmail(email)) {
             System.out.println("Error, email already exists.");
             return;
@@ -327,24 +429,39 @@ public class MySQL {
 
         try (Connection conn = MySQL.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            // Set the new email and the corresponding username in the query
             stmt.setString(1, email);
             stmt.setString(2, username);
+
+            // Execute the update
             stmt.executeUpdate();
 
         } catch (SQLException e) {
+            // Wrap and rethrow any SQL exceptions
             throw new RuntimeException(e);
         }
-
     }
 
-    public static boolean isEmail(String email) { //returns true if a string email is already connected to another account
+
+    /**
+     * Created by: Will Woodruff
+     * Checks if the given email is already associated with an existing user in the database.
+     *
+     * @param email the email address to check
+     * @return true if the email exists in the users table, false otherwise
+     */
+    public static boolean isEmail(String email) {
+        // SQL query to check if the given email exists in the users table
         String checkIfEmailExists = "SELECT EXISTS (SELECT 1 FROM users WHERE email = ?)";
 
         try (Connection conn = MySQL.getConnection();
              PreparedStatement stmt = conn.prepareStatement(checkIfEmailExists)) {
 
+            // Set the email parameter in the query
             stmt.setString(1, email);
 
+            // Execute the query and return the result
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     return rs.getBoolean(1);
@@ -353,24 +470,46 @@ public class MySQL {
                 }
             }
         } catch (SQLException e) {
+            // Rethrow as a runtime exception
             throw new RuntimeException(e);
         }
     }
 
-    public static void deleteUser(String username) { //removes user from the database based on the user
+
+    /**
+     * Created by: Will Woodruff
+     * Deletes a user from the database using their username.
+     *
+     * @param username the username of the user to delete
+     */
+    public static void deleteUser(String username) {
+        // SQL statement to delete the user with the given username
         String sql = "DELETE FROM users WHERE username = ?";
 
         try (Connection conn = MySQL.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
+            // Set the username parameter in the SQL query
             stmt.setString(1, username);
+
+            // Execute the delete operation
             stmt.executeUpdate();
+
         } catch (SQLException e) {
+            // Rethrow any SQL exceptions as runtime exceptions
             throw new RuntimeException(e);
         }
     }
 
-    public static List<Integer> getStorageID() {  // gets all the IDs of the storage units and inputs into a single dynamic array and returns that array
+
+    /**
+     * Created by: Will Woodruff
+     * Retrieves all storage unit IDs from the storage table and returns them in a dynamic list.
+     *
+     * @return a list of storage unit IDs
+     */
+    public static List<Integer> getStorageID() {
+        // SQL query to select all records from the storage table
         String sql = "SELECT * FROM storage";
         List<Integer> ids = new ArrayList<>();
 
@@ -378,24 +517,40 @@ public class MySQL {
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
+            // Add each storage unit ID to the list
             while (rs.next()) {
                 ids.add(rs.getInt("id"));
             }
 
         } catch (Exception e) {
+            // Wrap and rethrow any exceptions as runtime exceptions
             throw new RuntimeException(e);
         }
+
         return ids;
     }
 
-    public static List<Object> getStorageInformation(int id) { // gets all the information of a given id and puts it into a Object list
+
+    /**
+     * Created by: Will Woodruff
+     * Retrieves all storage unit information for a given ID and stores it in a list of objects.
+     * The returned list includes: ID (int), size (String), price (int), and location (String).
+     *
+     * @param id the ID of the storage unit to retrieve
+     * @return a list containing the storage unit's information, or an empty list if not found
+     */
+    public static List<Object> getStorageInformation(int id) {
+        // SQL query to select a storage unit by its ID
         String sql = "SELECT * FROM storage WHERE id = ?";
         List<Object> unit = new ArrayList<>();
 
         try (Connection conn = MySQL.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
+            // Set the ID parameter in the query
             stmt.setInt(1, id);
+
+            // Execute the query and retrieve the storage unit's data
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 unit.add(rs.getInt("id"));
@@ -407,81 +562,138 @@ public class MySQL {
             }
 
         } catch (Exception e) {
+            // Rethrow any exceptions as runtime exceptions
             throw new RuntimeException(e);
         }
 
         return unit;
     }
 
-    public static void createNewStorageUnit(String size, int price, String location) { //creates a new storageUnit
+
+    /**
+     * Created by: Will Woodruff
+     * Creates a new storage unit entry in the database with the given size, price, and location.
+     *
+     * @param size the size description of the storage unit (e.g. "10x10")
+     * @param price the monthly rental price of the storage unit
+     * @param location the location of the storage unit
+     */
+    public static void createNewStorageUnit(String size, int price, String location) {
+        // SQL query to insert a new storage unit into the storage table
         String sql = "INSERT INTO storage (size, price, location) VALUES (?, ?, ?)";
 
         try (Connection conn = MySQL.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
+            // Set the size, price, and location parameters in the SQL query
             stmt.setString(1, size);
             stmt.setInt(2, price);
             stmt.setString(3, location);
+
+            // Execute the insert operation
             stmt.executeUpdate();
 
         } catch (SQLException e) {
+            // Rethrow any SQL exceptions as runtime exceptions
             throw new RuntimeException(e);
         }
     }
 
-    public static void changePriceOfUnit(int id, int price) { //changes the price of a storage unit
+
+    /**
+     * Created by: Will Woodruff
+     * Updates the price of a specific storage unit in the database.
+     *
+     * @param id the ID of the storage unit to update
+     * @param price the new price to set for the unit
+     */
+    public static void changePriceOfUnit(int id, int price) {
+        // SQL query to update the price of a storage unit by ID
         String sql = "UPDATE storage SET price = ? WHERE id = ?";
 
         try (Connection conn = MySQL.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            // Set the new price and unit ID in the query
             stmt.setInt(1, price);
             stmt.setInt(2, id);
+
+            // Execute the update
             stmt.executeUpdate();
 
         } catch (SQLException e) {
+            // Wrap and rethrow any SQL exceptions
             throw new RuntimeException(e);
         }
     }
 
-    public static List<Integer> getUserReservations(int id_user) { //this takes a input of a user id and returns a list of storage id's that that user has reserved
+
+    /**
+     * Created by: Will Woodruff
+     * Retrieves a list of storage unit IDs that the specified user has reserved.
+     *
+     * @param id_user the ID of the user whose reservations are being fetched
+     * @return a list of storage unit IDs reserved by the user
+     */
+    public static List<Integer> getUserReservations(int id_user) {
+        // SQL query to select all reservations made by the user
         String sql = "SELECT * FROM storage_reservations WHERE user_id = ?";
         List<Integer> storageID = new ArrayList<>();
 
         try (Connection conn = MySQL.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
+            // Set the user ID in the query
             stmt.setInt(1, id_user);
+
+            // Execute the query and collect the storage IDs
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 storageID.add(rs.getInt("storage_id"));
             }
 
         } catch (Exception e) {
+            // Rethrow any exceptions as runtime exceptions
             throw new RuntimeException(e);
         }
 
         return storageID;
     }
 
-    public static int getUserID(String username) { // this takes input of a username and returns the id of the given user
+
+    /**
+     * Created by: Will Woodruff
+     * Retrieves the user ID associated with the given username.
+     *
+     * @param username the username to search for
+     * @return the ID of the user with the given username
+     * @throws RuntimeException if no user is found with the given username
+     */
+    public static int getUserID(String username) {
+        // SQL query to select the user by username
         String sql = "SELECT * FROM users WHERE userName = ?";
 
         try (Connection conn = MySQL.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
+            // Set the username parameter in the query
             stmt.setString(1, username);
+
+            // Execute the query and return the user ID if found
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 return rs.getInt("id");
             } else {
+                // Throw an exception if no user is found
                 throw new RuntimeException("No user found with username: " + username);
             }
 
         } catch (Exception e) {
+            // Rethrow any exception as a runtime exception
             throw new RuntimeException(e);
         }
-
     }
+
 
     /**
      * Created by: Alexis Anguiano
@@ -682,7 +894,15 @@ public class MySQL {
         }
     }
 
+    /**
+     * Created by: Will Woodruff
+     * Retrieves reservation revenue data from the storage_reservations table.
+     * For each reservation, it extracts the year and month of the start date, and the price.
+     *
+     * @return a list containing year, month, and price for each reservation (in that order, repeated)
+     */
     public static List<Integer> getReservationRevenueInfo() {
+        // SQL query to retrieve the start date and price of each reservation
         String sql = "SELECT start_date, price FROM storage_reservations";
         List<Integer> storageInfo = new ArrayList<>();
 
@@ -691,16 +911,18 @@ public class MySQL {
 
             ResultSet rs = stmt.executeQuery();
 
+            // For each reservation, extract year, month, and price, and add to the list
             while (rs.next()) {
                 LocalDate startDate = rs.getDate("start_date").toLocalDate();
                 int price = rs.getInt("price");
 
-                storageInfo.add(startDate.getYear());  // Year
-                storageInfo.add(startDate.getMonthValue()); // Month
-                storageInfo.add(price);
+                storageInfo.add(startDate.getYear());        // Add year
+                storageInfo.add(startDate.getMonthValue());  // Add month
+                storageInfo.add(price);                      // Add price
             }
 
         } catch (Exception e) {
+            // Rethrow any exceptions as runtime exceptions
             throw new RuntimeException(e);
         }
 
@@ -708,23 +930,41 @@ public class MySQL {
     }
 
 
-    public static int getPrice(int storage_id) { //Helper for getReservationRevenueInfo, it grabs the price of a storage unit given a units id.
+
+    /**
+     * Created by: Will Woodruff
+     * Retrieves the price of a storage unit based on its ID.
+     * Used as a helper method for calculating reservation revenue.
+     *
+     * @param storage_id the ID of the storage unit
+     * @return the price of the storage unit, or -1 if the unit is not found
+     */
+    public static int getPrice(int storage_id) {
+        // SQL query to get the price of a storage unit by its ID
         String sql = "SELECT price FROM storage WHERE id = ?";
+
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            // Set the storage unit ID in the query
             stmt.setInt(1, storage_id);
+
+            // Execute the query and return the price if found
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     return rs.getInt("price");
                 } else {
+                    // Return -1 if no storage unit was found
                     return -1;
                 }
             }
 
         } catch (SQLException e) {
+            // Rethrow any SQL exceptions as runtime exceptions
             throw new RuntimeException(e);
         }
     }
+
 
 
 }
