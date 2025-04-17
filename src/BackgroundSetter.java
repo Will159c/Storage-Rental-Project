@@ -2,8 +2,17 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * Class is used to apply a background to the JPanel without changing how
+ * a) Class Name: BackgroundSetter
+ * b) Date of the Code: April 9, 2025
+ * c) Programmers Names: Miguel Sicaja
+ * d) Brief description: Class is used to apply a background to the JPanel without changing how
  * the GUI uses the panel.
+ * e) Brief explanation of important functions:
+ * - paintComponent: paints the background with an image in the panel
+ * f) Important Data Structures:
+ * - None
+ * g) Algorithms used:
+ * - Uses basic rendering algorithm to draw background and give appropriate scaling.
  */
 public class BackgroundSetter extends JPanel {
     private final Image bgImg;
