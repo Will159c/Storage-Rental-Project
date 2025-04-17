@@ -4,13 +4,14 @@ import java.util.Properties;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Calendar;
+
 /**
  * A) Class name: EmailNotifier
  * B) Date of the Code: March 18 ,2025
  * C) Programmer's name: Alexis Anguiano
  * D) Brief description: Utility class for sending emails using the JavaMail API.
  * E) Brief explanation of important function: sendEmail sends generic email given parameters.
- * sendReservationConfirmation sens detaitled confirmation email. sendCancelConfirmation sends a email after cancellation.
+ * sendReservationConfirmation sens detailed confirmation email. sendCancelConfirmation sends a email after cancellation.
  * F) Important data structures: SMTP setting stored as properties.
  * G) Algorithm used: Stateless static methods abstract JavaMail setup and sending to avoid instance creation.
  */
@@ -82,10 +83,10 @@ public class EmailNotifier {
 
         SimpleDateFormat fmt = new SimpleDateFormat("MM-dd-yyyy");
 
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(startDate);
-        cal.add(Calendar.DATE, 30);
-        Date billingEndDate = cal.getTime();
+        Calendar c = Calendar.getInstance();
+        c.setTime(startDate);
+        c.add(Calendar.DATE, 30);
+        String nextBillDate = fmt.format(c.getTime());
 
         StringBuilder body = new StringBuilder();
         body.append("Reservation Confirmed!\n\n")
@@ -93,13 +94,9 @@ public class EmailNotifier {
                 .append("Size: ").append(size).append("\n")
                 .append("Price per Month: $").append(pricePerMonth).append("\n")
                 .append("Location: ").append(location).append("\n\n")
-                .append("Start Date: ").append(fmt.format(startDate)).append("\n");
-
-        body.append("\nBilling Statement:\n")
-                .append("Rental Period: ").append(fmt.format(startDate))
-                .append(" - ").append(fmt.format(billingEndDate)).append("\n")
-                .append("Total for this period: $").append(pricePerMonth).append("\n\n")
-                .append("Thank you for choosing us!");
+                .append("Start Date: ").append(fmt.format(startDate)).append("\n")
+                .append("Next Billing Date: ").append(nextBillDate).append("\n")
+                .append("\nThank you for choosing us!");
 
         sendEmail(recipient, "Storage Reservation Confirmed", body.toString());
     }

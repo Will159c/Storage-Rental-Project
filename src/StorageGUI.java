@@ -9,6 +9,8 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import org.jdatepicker.impl.*;
 import java.util.Properties;
+import java.util.Calendar;
+
 
 /**
  * A) Class Name: StorageGUI
@@ -376,14 +378,12 @@ public class StorageGUI extends JPanel {
         JPasswordField cardField = reserved ? null : addCardField(panel, gbc);
 
         JDatePickerImpl startPicker = null;
-        JDatePickerImpl endPicker = null;
         if (!reserved) {
-            var pickers = addDatePickers(panel, gbc);
-            startPicker = pickers[0];
-            endPicker = pickers[1];
+            startPicker = addStartDatePicker(panel, gbc);
+
         }
 
-        addActionButtons(panel, gbc, reserved, storageID, email, price, passwordField, cardField, startPicker, endPicker);
+        addActionButtons(panel, gbc, reserved, storageID, email, price, passwordField, cardField, startPicker);
 
         myGui.addPanel(panel, "Reservation Panel");
         myGui.showMain("Reservation Panel");
@@ -466,19 +466,18 @@ public class StorageGUI extends JPanel {
 
     /**
      * Created by: Alexis Anguiano
-     * Adds start and end date pickers to the panel
+     * Adds start pickers to the panel
      * @param panel the panel to add to
      * @param gbc layout constraints
-     * @return array of [startpicker,endpicker]
+     * @return  start picker
      */
-    private JDatePickerImpl[] addDatePickers(JPanel panel, GridBagConstraints gbc) {
+    private JDatePickerImpl addStartDatePicker(JPanel panel, GridBagConstraints gbc) {
         Properties props = new Properties();
         props.put("text.month", "Month");
         props.put("text.today", "Today");
         props.put("text.year", "Year");
 
         JDatePickerImpl startPicker = new JDatePickerImpl(new JDatePanelImpl(new UtilDateModel(), props), new DateLabelFormatter());
-        JDatePickerImpl endPicker = new JDatePickerImpl(new JDatePanelImpl(new UtilDateModel(), props), new DateLabelFormatter());
 
         gbc.gridy++;
         gbc.gridx = 0;
@@ -486,14 +485,9 @@ public class StorageGUI extends JPanel {
         gbc.gridx = 1;
         panel.add(startPicker, gbc);
 
-        gbc.gridy++;
-        gbc.gridx = 0;
-        panel.add(new JLabel("End Date:"), gbc);
-        gbc.gridx = 1;
-        panel.add(endPicker, gbc);
-
-        return new JDatePickerImpl[]{startPicker, endPicker};
+        return startPicker;
     }
+
 
     /**
      * Created by: Alexis Anguiano
@@ -507,11 +501,11 @@ public class StorageGUI extends JPanel {
      * @param passwordField password input
      * @param cardField card input
      * @param startPicker start date picker
-     * @param endPicker end date picker
      */
     private void addActionButtons(JPanel panel, GridBagConstraints gbc, boolean reserved, int storageID, String email, int price,
                                   JPasswordField passwordField, JPasswordField cardField,
-                                  JDatePickerImpl startPicker, JDatePickerImpl endPicker) {
+                                  JDatePickerImpl startPicker)
+    {
         JButton actionButton = new JButton(reserved ? "Cancel Reservation" : "Reserve");
 
         actionButton.addActionListener(e -> {
@@ -524,7 +518,7 @@ public class StorageGUI extends JPanel {
             if (reserved) {
                 handleCancellation(storageID, email, password);
             } else {
-                handleReservation(storageID, email, price, password, cardField, startPicker, endPicker);
+                handleReservation(storageID, email, price, password, cardField, startPicker);
             }
         });
 
@@ -549,10 +543,10 @@ public class StorageGUI extends JPanel {
      * @param password password to verify
      * @param cardField card number input
      * @param startPicker start date picker
-     * @param endPicker end date picker
      */
     private void handleReservation(int storageID, String email, int price, String password,
-                                   JPasswordField cardField, JDatePickerImpl startPicker, JDatePickerImpl endPicker) {
+                                   JPasswordField cardField, JDatePickerImpl startPicker)
+    {
         String cardNumber = new String(cardField.getPassword()).trim();
         if (!cardNumber.matches("\\d{16}")) {
             JOptionPane.showMessageDialog(null, "Invalid card number", "Error", JOptionPane.ERROR_MESSAGE);
@@ -560,15 +554,28 @@ public class StorageGUI extends JPanel {
         }
 
         Date startDate = (Date) startPicker.getModel().getValue();
-
         if (startDate == null) {
-            JOptionPane.showMessageDialog(null, "Invalid date range", "Date Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Invalid date", "Date Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        Calendar c = Calendar.getInstance();
-        c.setTime(startDate);
-        c.add(Calendar.DATE, 30);
+        Calendar todayCal = Calendar.getInstance();
+        todayCal.set(Calendar.HOUR_OF_DAY, 0);
+        todayCal.set(Calendar.MINUTE, 0);
+        todayCal.set(Calendar.SECOND, 0);
+        todayCal.set(Calendar.MILLISECOND, 0);
+
+        Calendar selectedCal = Calendar.getInstance();
+        selectedCal.setTime(startDate);
+        selectedCal.set(Calendar.HOUR_OF_DAY, 0);
+        selectedCal.set(Calendar.MINUTE, 0);
+        selectedCal.set(Calendar.SECOND, 0);
+        selectedCal.set(Calendar.MILLISECOND, 0);
+
+        if (selectedCal.before(todayCal)) {
+            JOptionPane.showMessageDialog(null, "Start date cannot be in the past", "Date Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
         int userID = MySQL.getUserID(myGui.getUsername());
         MySQL.reserveStorageUnit(storageID, email, userID, password, startDate, price);
@@ -577,6 +584,7 @@ public class StorageGUI extends JPanel {
         allUnits = MySQL.getAllStorageDetails();
         myGui.loginUser(myGui.getUsername());
     }
+
 
     /**
      * Created by: Alexis Anguiano

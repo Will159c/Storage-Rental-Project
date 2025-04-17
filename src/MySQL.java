@@ -4,16 +4,17 @@ import java.sql.*;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.Date;
+import java.time.ZoneId;
+
 
 /**
  * A) Class name: DateLabelFormatter
  * B) Date of the Code: March 30 ,2025
- * C) Programmer's name: William Alexis Anguiano
+ * C) Programmer's name: William, Alexis Anguiano
  * D) Brief description: This class serves as the main data access layer for the application. It connects to a
  * mysql database and performs operations.
  * E) Brief explanation of important function:
@@ -33,7 +34,7 @@ import java.util.Date;
 public class MySQL {
     private static final String URL = "jdbc:mysql://caboose.proxy.rlwy.net:54157/railway";
     private static final String USER = "root";
-    private static final String PASSWORD = "replace here"; // Replace with actual password
+    private static final String PASSWORD = "Replace here"; // Replace with actual password
 
     /**
      * Establishes and returns a database connection using predefined URL, user, and password.
@@ -43,6 +44,7 @@ public class MySQL {
     private static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(URL, USER, PASSWORD);
     }
+
 
     /**
      * Holds the details of a storage unit in memory to display the units faster.
@@ -510,26 +512,35 @@ public class MySQL {
 
             if (rs.next()) {
                 return false;  // Already reserved
-            } else {
-                reserveStmt.setInt(1, storageID);
-                reserveStmt.setString(2, email);
-                reserveStmt.setInt(3, id_user);
-                reserveStmt.setDate(4, new java.sql.Date(startDate.getTime()));
-                reserveStmt.setInt(5, price);
-
-                if (reserveStmt.executeUpdate() > 0) {
-                    EmailNotifier.sendEmail("storagerentalproject@gmail.com", "New Reservation",
-                            "A new storage unit (ID: " + storageID + ") has been reserved.");
-                    return true;
-                }
-                return false;
             }
+
+            reserveStmt.setInt(1, storageID);
+            reserveStmt.setString(2, email);
+            reserveStmt.setInt(3, id_user);
+
+            ZoneId pacificZone = ZoneId.of("America/Los_Angeles");
+            LocalDate shifted = startDate.toInstant()
+                    .atZone(pacificZone)
+                    .toLocalDate()
+                    .plusDays(1); // shift to fix DATE+UTC truncation
+            reserveStmt.setDate(4, java.sql.Date.valueOf(shifted));
+
+            reserveStmt.setInt(5, price);
+
+            if (reserveStmt.executeUpdate() > 0) {
+                EmailNotifier.sendEmail("storagerentalproject@gmail.com", "New Reservation",
+                        "A new storage unit (ID: " + storageID + ") has been reserved.");
+                return true;
+            }
+
+            return false;
 
         } catch (SQLException e) {
             System.err.println("Error reserving storage unit: " + e.getMessage());
             return false;
         }
     }
+
 
     /**
      * Created by: Alexis Anguiano
