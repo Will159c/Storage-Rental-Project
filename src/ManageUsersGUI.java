@@ -4,8 +4,20 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
- * Admin page for the GUI for managing users.
+ * a) Class Name: ManageUsersGUI
+ * b) Date of the Code: March 19, 2025
+ * c) Programmers Names: Miguel Sicaja
+ * d) Brief description: Admin page for the GUI for managing users.
  * Admin is able to delete users from the database or update their email addresses.
+ * e) Brief explanation of important functions:
+ * - handleUserDeletion: Deletes user from database if they exist and field is not empty
+ * - handleEmailUpdate: Updates a user's email if user is in database and email is already not
+ * - validateEmailUpdate: checks if input for updating email information is valid
+ * in use
+ * f) Important Data Structures:
+ * - MySQL: Provides means of deleting users or updating their email
+ * g) Algorithms used:
+ * - Uses a basic algorithm for checking user and email status for email updates or user deletion
  */
 public class ManageUsersGUI extends JPanel {
     private MyGUI myGui;
