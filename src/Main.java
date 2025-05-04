@@ -7,6 +7,7 @@ import storagerental.StorageRentalApplication;
  */
 public class Main {
     public static void main(String[] Args) {
+
         // Start the backend server (StorageRentalApplication) in a separate thread
         new Thread(() -> {
             StorageRentalApplication.main(new String[]{});

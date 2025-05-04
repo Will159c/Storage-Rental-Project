@@ -34,7 +34,7 @@ import java.time.ZoneId;
 public class MySQL {
     private static final String URL = "jdbc:mysql://caboose.proxy.rlwy.net:54157/railway";
     private static final String USER = "root";
-    private static final String PASSWORD = "replace here"; // Replace with actual password
+    private static final String PASSWORD = "Replace Here"; // Replace with actual password
 
     /**
      * Establishes and returns a database connection using predefined URL, user, and password.
@@ -140,7 +140,6 @@ public class MySQL {
 
         return allUnits;
     }
-
 
     /**
      * Created by: Will Woodruff
@@ -491,6 +490,25 @@ public class MySQL {
 
             // Set the username parameter in the SQL query
             stmt.setString(1, username);
+
+            // Execute the delete operation
+            stmt.executeUpdate();
+
+        } catch (SQLException e) {
+            // Rethrow any SQL exceptions as runtime exceptions
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void deleteStorageUnit(int storage_id) {
+        // SQL statement to delete the user with the given username
+        String sql = "DELETE FROM storage WHERE id = ?";
+
+        try (Connection conn = MySQL.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            // Set the username parameter in the SQL query
+            stmt.setInt(1, storage_id);
 
             // Execute the delete operation
             stmt.executeUpdate();
