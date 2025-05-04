@@ -33,56 +33,32 @@ import java.util.Calendar;
  *    - Basic date validation and credit card number checks (simple string matching).
  */
 
+@SuppressWarnings("serial")
 public class StorageGUI extends JPanel {
 
-    /**
-     * Reference to the main GUI page.
-     * */
-    private MyGUI myGui;
-
-    /**
-     * A panel used to display the storage unit squares.
-     * */
-    private JPanel squaresPanel;
-
-    /**
-     * Scroll pane to scroll the squaresPanel.
-     * */
-    private JScrollPane scrollPane;
-
-    /**
-     * In-memory list of storage units to avoid repeated DB calls.
-     * Uses MySQL.StorageDetails to store unit details.
-     */
+    private final MyGUI myGui;
+    private final JPanel squaresPanel;
+    private final JScrollPane scrollPane;
+    /** in‑memory cache so we don’t hit DB every refresh */
     private List<MySQL.StorageDetails> allUnits;
+    private boolean hideOthersReserved = false;
+    private Runnable redrawCallback = null; // remembers last drawing routine
 
-    /**
-     * Constructs a new StorageGUI panel.
-     * @param myGui the main GUI controller object.
-     */
     public StorageGUI(MyGUI myGui) {
         this.myGui = myGui;
         setLayout(new BorderLayout());
-
-        // NEW: Load all storage units in one call.
         allUnits = MySQL.getAllStorageDetails();
-
-        // Create and add title.
         JLabel titleTxt = new JLabel("Storage Units Browser", SwingConstants.CENTER);
         titleTxt.setFont(new Font("SansSerif", Font.BOLD, 20));
         add(titleTxt, BorderLayout.NORTH);
-
-        // Create the top panel with search and sort controls.
         JPanel topBtnPanel = new JPanel();
-        topBtnPanel.setOpaque(false);  // Make background transparent so our painted image shows through
+        topBtnPanel.setOpaque(false);
 
+        // view all availaible units
         JButton viewAvailBtn = new JButton("View Available Units");
 
-        // Combo box for price sort options.
-        String[] priceOptions = {
-                "Price: Lowest to Highest",
-                "Price: Highest to Lowest"
-        };
+        // price sort
+        String[] priceOptions = {"Price: Lowest to Highest", "Price: Highest to Lowest"};
         JComboBox<String> priceSortCombo = new JComboBox<>(priceOptions);
         priceSortCombo.addActionListener(e -> {
             if (priceSortCombo.getSelectedIndex() == 0) {
@@ -92,11 +68,8 @@ public class StorageGUI extends JPanel {
             }
         });
 
-        // Combo box for size sort options.
-        String[] sizeOptions = {
-                "Size: Smallest to Biggest",
-                "Size: Biggest to Smallest"
-        };
+        // size sort
+        String[] sizeOptions = {"Size: Smallest to Biggest", "Size: Biggest to Smallest"};
         JComboBox<String> sizeSortCombo = new JComboBox<>(sizeOptions);
         sizeSortCombo.addActionListener(e -> {
             if (sizeSortCombo.getSelectedIndex() == 0) {
@@ -106,133 +79,119 @@ public class StorageGUI extends JPanel {
             }
         });
 
+        // location filter
+        Set<String> locationSet = new HashSet<>();
+        for (MySQL.StorageDetails sd : allUnits) locationSet.add(sd.getLocation());
+        List<String> locations = new ArrayList<>(locationSet);
+        Collections.sort(locations);
+        String[] locationOptions = new String[locations.size() + 1];
+        locationOptions[0] = "All Locations";
+        for (int i = 0; i < locations.size(); i++) locationOptions[i + 1] = locations.get(i);
+        JComboBox<String> locationCombo = new JComboBox<>(locationOptions);
+        locationCombo.addActionListener(e -> {
+            String sel = (String) locationCombo.getSelectedItem();
+            if ("All Locations".equals(sel)) {
+                showAllUnits();
+            } else {
+                showUnitsFilteredByLocation(sel);
+            }
+        });
+
+        // Exclude‑reserved checkbox
+        JCheckBox excludeChk = new JCheckBox("Hide other users’ reserved units");
+        excludeChk.addItemListener(e -> {
+            hideOthersReserved = (e.getStateChange() == ItemEvent.SELECTED);
+            if (redrawCallback != null) redrawCallback.run();
+        });
 
         topBtnPanel.add(viewAvailBtn);
         topBtnPanel.add(priceSortCombo);
         topBtnPanel.add(sizeSortCombo);
-
-        // Create a combo box for location filtering.
-        Set<String> locationSet = new HashSet<>();
-        for (MySQL.StorageDetails sd : allUnits) {
-            locationSet.add(sd.getLocation());
-        }
-        List<String> locations = new ArrayList<>(locationSet);
-        Collections.sort(locations);  // sort alphabetically
-        String[] locationOptions = new String[locations.size() + 1];
-        locationOptions[0] = "All Locations";
-        for (int i = 0; i < locations.size(); i++) {
-            locationOptions[i + 1] = locations.get(i);
-        }
-        JComboBox<String> locationCombo = new JComboBox<>(locationOptions);
-        locationCombo.addActionListener(e -> {
-            String selected = (String) locationCombo.getSelectedItem();
-            if (selected.equals("All Locations")) {
-                showAllUnits();
-            } else {
-                showUnitsFilteredByLocation(selected);
-            }
-        });
         topBtnPanel.add(locationCombo);
-
+        topBtnPanel.add(excludeChk);
         add(topBtnPanel, BorderLayout.PAGE_START);
 
-        // Setup the scrolling panel for storage unit squares.
-        squaresPanel = new JPanel();
-        squaresPanel.setLayout(new GridLayout(0, 4, 10, 10));
+        squaresPanel = new JPanel(new GridLayout(0, 4, 10, 10));
         squaresPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        squaresPanel.setOpaque(false);  // Allow background image to show through
-
+        squaresPanel.setOpaque(false);
         scrollPane = new JScrollPane(squaresPanel);
-        scrollPane.setOpaque(false);               // Make scroll pane transparent
-        scrollPane.getViewport().setOpaque(false);   // Make viewport transparent
+        scrollPane.setOpaque(false);
+        scrollPane.getViewport().setOpaque(false);
         add(scrollPane, BorderLayout.CENTER);
-
-        // Create and add the back button.
         JButton backBtn = new JButton("Back");
         backBtn.addActionListener(e -> myGui.loginUser(myGui.getUsername()));
         add(backBtn, BorderLayout.SOUTH);
-
-        // Add action listeners for viewing all and available units.
-
         viewAvailBtn.addActionListener(e -> showAvailableUnits());
         showAllUnits();
     }
 
-    /**
-     * Retrieves all storage units, and displays them on the GUI.
-     */
+    //filter helper
+    private boolean passesReservedFilter(MySQL.StorageDetails sd) {
+        if (!hideOthersReserved) return true;          // filter disabled
+        if (!sd.isReserved())   return true;          // not reserved at all
+        String email = MySQL.getEmailByUsername(myGui.getUsername());
+        return MySQL.isUnitReservedByUser(sd.getId(), email); // keep if mine
+    }
+
     private void showAllUnits() {
+        redrawCallback = this::showAllUnits;
         allUnits = MySQL.getAllStorageDetails();
         squaresPanel.removeAll();
         for (MySQL.StorageDetails sd : allUnits) {
+            if (!passesReservedFilter(sd)) continue;
             squaresPanel.add(createStorageSquare(sd));
         }
         squaresPanel.revalidate();
         squaresPanel.repaint();
     }
 
-    /**
-     * Displays only the available (not reserved) storage units.
-     */
     private void showAvailableUnits() {
+        redrawCallback = this::showAvailableUnits;
         squaresPanel.removeAll();
         for (MySQL.StorageDetails sd : allUnits) {
-            if (!sd.isReserved()) {
-                squaresPanel.add(createStorageSquare(sd));
-            }
+            if (sd.isReserved()) continue;
+            if (!passesReservedFilter(sd)) continue;
+            squaresPanel.add(createStorageSquare(sd));
         }
         squaresPanel.revalidate();
         squaresPanel.repaint();
     }
 
-    /**
-     * Displays storage units sorted by price.
-     * @param ascending if true, sorts from lowest to highest; otherwise, highest to lowest.
-     */
     private void showUnitsSortedByPrice(boolean ascending) {
+        redrawCallback = () -> showUnitsSortedByPrice(ascending);
         squaresPanel.removeAll();
         List<MySQL.StorageDetails> sorted = new ArrayList<>(allUnits);
-        if (ascending) {
-            sorted.sort(Comparator.comparingInt(MySQL.StorageDetails::getPrice));
-        } else {
-            sorted.sort(Comparator.comparingInt(MySQL.StorageDetails::getPrice).reversed());
-        }
+        sorted.sort(ascending ? Comparator.comparingInt(MySQL.StorageDetails::getPrice)
+                : Comparator.comparingInt(MySQL.StorageDetails::getPrice).reversed());
         for (MySQL.StorageDetails sd : sorted) {
+            if (!passesReservedFilter(sd)) continue;
             squaresPanel.add(createStorageSquare(sd));
         }
         squaresPanel.revalidate();
         squaresPanel.repaint();
     }
 
-    /**
-     * Displays storage units sorted by size.
-     * @param ascending if true, sorts from smallest to biggest; otherwise, biggest to smallest.
-     */
     private void showUnitsSortedBySize(boolean ascending) {
+        redrawCallback = () -> showUnitsSortedBySize(ascending);
         squaresPanel.removeAll();
         List<MySQL.StorageDetails> sorted = new ArrayList<>(allUnits);
-        if (ascending) {
-            sorted.sort(Comparator.comparing(MySQL.StorageDetails::getSize, String.CASE_INSENSITIVE_ORDER));
-        } else {
-            sorted.sort(Comparator.comparing(MySQL.StorageDetails::getSize, String.CASE_INSENSITIVE_ORDER).reversed());
-        }
+        sorted.sort(ascending ? Comparator.comparing(MySQL.StorageDetails::getSize, String.CASE_INSENSITIVE_ORDER)
+                : Comparator.comparing(MySQL.StorageDetails::getSize, String.CASE_INSENSITIVE_ORDER).reversed());
         for (MySQL.StorageDetails sd : sorted) {
+            if (!passesReservedFilter(sd)) continue;
             squaresPanel.add(createStorageSquare(sd));
         }
         squaresPanel.revalidate();
         squaresPanel.repaint();
     }
 
-    /**
-     * Displays only storage units filtered by a specific location.
-     * @param location the location filter to apply.
-     */
     private void showUnitsFilteredByLocation(String location) {
+        redrawCallback = () -> showUnitsFilteredByLocation(location);
         squaresPanel.removeAll();
         for (MySQL.StorageDetails sd : allUnits) {
-            if (sd.getLocation().equalsIgnoreCase(location)) {
-                squaresPanel.add(createStorageSquare(sd));
-            }
+            if (!sd.getLocation().equalsIgnoreCase(location)) continue;
+            if (!passesReservedFilter(sd)) continue;
+            squaresPanel.add(createStorageSquare(sd));
         }
         squaresPanel.revalidate();
         squaresPanel.repaint();
@@ -248,60 +207,48 @@ public class StorageGUI extends JPanel {
         unitPanel.setPreferredSize(new Dimension(200, 300));
         unitPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 
+        // ── top: labels ───────────────────────────────────────────────
         JPanel topPanel = new JPanel();
-        // Use a vertical BoxLayout so labels stack
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
-        topPanel.setOpaque(false); // Keep it transparent if you have colored backgrounds
-        // Add some spacing around the labels
+        topPanel.setOpaque(false);
         topPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
 
-        // Create labels, each centered horizontally
-        JLabel idLabel = new JLabel("ID: " + sd.getId(), SwingConstants.CENTER);
-        idLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        JLabel sizeLabel = new JLabel("Size: " + sd.getSize(), SwingConstants.CENTER);
-        sizeLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        JLabel priceLabel = new JLabel("Price: $" + sd.getPrice(), SwingConstants.CENTER);
-        priceLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JLabel idLabel       = new JLabel("ID: " + sd.getId(),      SwingConstants.CENTER);
+        JLabel sizeLabel     = new JLabel("Size: " + sd.getSize(),  SwingConstants.CENTER);
+        JLabel priceLabel    = new JLabel("Price: $" + sd.getPrice(),SwingConstants.CENTER);
         JLabel locationLabel = new JLabel("Location: " + sd.getLocation(), SwingConstants.CENTER);
-        locationLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        for (JLabel l : new JLabel[]{idLabel, sizeLabel, priceLabel, locationLabel})
+            l.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // Add them to topPanel
         topPanel.add(idLabel);
         topPanel.add(sizeLabel);
         topPanel.add(priceLabel);
         topPanel.add(locationLabel);
-
         unitPanel.add(topPanel, BorderLayout.NORTH);
+
+        // ── centre: image ─────────────────────────────────────────────
         JPanel centerPanel = new JPanel(new GridBagLayout());
-        centerPanel.setOpaque(false); // Transparent so background can show
+        centerPanel.setOpaque(false);
         JLabel imageLabel = new JLabel();
         String location = sd.getLocation();
-        String imageName = "background.jpg";
-        if ("Lancaster".equalsIgnoreCase(location)) {
-            imageName = "lancaster.png";
-        } else if ("Downtown LA".equalsIgnoreCase(location)) {
-            imageName = "dontownla.png";
-        } else if ("Reseda".equalsIgnoreCase(location)) {
-            imageName = "reseda.png";
-        } else if ("Van Nuys".equalsIgnoreCase(location)) {
-            imageName = "vannuys.png";
-        } else if ("Northridge".equalsIgnoreCase(location)) {
-            imageName = "northridge.png";
-        }
+        String imageName = switch (location.toLowerCase()) {
+            case "lancaster"    -> "lancaster.png";
+            case "downtown la"  -> "dontownla.png";
+            case "reseda"       -> "reseda.png";
+            case "van nuys"     -> "vannuys.png";
+            case "northridge"   -> "northridge.png";
+            default              -> "background.jpg";
+        };
         java.net.URL imgUrl = getClass().getResource("/" + imageName);
         if (imgUrl != null) {
             ImageIcon icon = new ImageIcon(imgUrl);
-            int maxWidth = 240, maxHeight = 180;
+            int maxW = 240, maxH = 180;
             int w = icon.getIconWidth();
             int h = icon.getIconHeight();
-            double aspect = (double) w / (double) h;
-
-            int newW = maxWidth;
+            double aspect = (double) w / h;
+            int newW = maxW;
             int newH = (int) (newW / aspect);
-            if (newH > maxHeight) {
-                newH = maxHeight;
-                newW = (int) (newH * aspect);
-            }
+            if (newH > maxH) { newH = maxH; newW = (int) (newH * aspect); }
             Image scaled = icon.getImage().getScaledInstance(newW, newH, Image.SCALE_SMOOTH);
             imageLabel.setIcon(new ImageIcon(scaled));
         } else {
@@ -310,52 +257,42 @@ public class StorageGUI extends JPanel {
         centerPanel.add(imageLabel);
         unitPanel.add(centerPanel, BorderLayout.CENTER);
 
+        // ── bottom: reserve / status ──────────────────────────────────
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 10));
         bottomPanel.setOpaque(false);
 
         if (sd.isReserved()) {
-            // Unit is reserved
-            String currentUserEmail = MySQL.getEmailByUsername(myGui.getUsername());
+            String currentEmail = MySQL.getEmailByUsername(myGui.getUsername());
             JLabel reservedLabel = new JLabel();
-            if (MySQL.isUnitReservedByUser(sd.getId(), currentUserEmail)) {
-                // Reserved by this user: light green background
-                unitPanel.setBackground(new Color(144, 238, 144));
+            if (MySQL.isUnitReservedByUser(sd.getId(), currentEmail)) {
+                unitPanel.setBackground(new Color(144, 238, 144)); // light green
                 reservedLabel.setText("Reserved by you");
                 reservedLabel.setForeground(Color.GREEN.darker());
             } else {
-                // Reserved by someone else: light red background
-                unitPanel.setBackground(new Color(255, 182, 193));
+                unitPanel.setBackground(new Color(255, 182, 193)); // light red
                 reservedLabel.setText("Reserved");
                 reservedLabel.setForeground(Color.RED);
             }
             bottomPanel.add(reservedLabel);
 
             unitPanel.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
+                @Override public void mouseClicked(MouseEvent e) {
                     int storageID = sd.getId();
                     String username = myGui.getUsername();
                     String email = MySQL.getEmailByUsername(username);
                     if (MySQL.isUnitReservedByUser(storageID, email)) {
                         openReservationPanel(storageID);
                     } else {
-                        JOptionPane.showMessageDialog(null,
-                                "You don't have this unit reserved.",
-                                "Access Denied",
-                                JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(null, "You don't have this unit reserved.", "Access Denied", JOptionPane.ERROR_MESSAGE);
                     }
                 }
             });
         } else {
-            // Unit is available, show "Reserve" button
             JButton reserveBtn = new JButton("Reserve");
             reserveBtn.addActionListener(e -> openReservationPanel(sd.getId()));
             bottomPanel.add(reserveBtn);
         }
-
-        // Add the bottom panel
         unitPanel.add(bottomPanel, BorderLayout.SOUTH);
-
         return unitPanel;
     }
 

@@ -34,7 +34,7 @@ import java.time.ZoneId;
 public class MySQL {
     private static final String URL = "jdbc:mysql://caboose.proxy.rlwy.net:54157/railway";
     private static final String USER = "root";
-    private static final String PASSWORD = "replace here"; // Replace with actual password
+    private static final String PASSWORD = "OaWunWeWjnACHWrhVxwAIQJVZPtotFuD"; // Replace with actual password
 
     /**
      * Establishes and returns a database connection using predefined URL, user, and password.
