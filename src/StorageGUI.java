@@ -350,13 +350,25 @@ public class StorageGUI extends JPanel {
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 2;
-        panel.add(new JLabel("Storage ID: " + storageID, SwingConstants.CENTER), gbc);
+        JLabel headerLabel = new JLabel("Storage ID: " + storageID, SwingConstants.CENTER);
+        headerLabel.setFont(new Font("SansSerif", Font.BOLD, 40));
+        panel.add(headerLabel, gbc);
 
         gbc.gridy = 1;
         gbc.gridwidth = 1;
-        panel.add(new JLabel("Email:"), gbc);
+        JLabel emailLabel = new JLabel("Email:");
+        emailLabel.setOpaque(true); // Allow for background of border to be colored
+        emailLabel.setBackground(Color.BLACK); // Set background border color
+        emailLabel.setForeground(Color.WHITE); // Set text color
+        emailLabel.setBorder(BorderFactory.createLineBorder(Color.black)); // Create the border
+        panel.add(emailLabel, gbc);
         gbc.gridx = 1;
-        panel.add(new JLabel(email), gbc);
+        JLabel userEmailLabel = new JLabel(email);
+        userEmailLabel.setOpaque(true); // Allow for background of border to be colored
+        userEmailLabel.setBackground(Color.BLACK); // Set background border color
+        userEmailLabel.setForeground(Color.WHITE); // Set text color
+        userEmailLabel.setBorder(BorderFactory.createLineBorder(Color.black)); // Create the border
+        panel.add(userEmailLabel, gbc);
     }
 
     /**
@@ -369,7 +381,12 @@ public class StorageGUI extends JPanel {
     private JPasswordField addPasswordField(JPanel panel, GridBagConstraints gbc) {
         gbc.gridy++;
         gbc.gridx = 0;
-        panel.add(new JLabel("Reenter Password:"), gbc);
+        JLabel passLabel = new JLabel("Reenter Password:");
+        passLabel.setOpaque(true); // Allow for background of border to be colored
+        passLabel.setBackground(Color.BLACK); // Set background border color
+        passLabel.setForeground(Color.WHITE); // Set text color
+        passLabel.setBorder(BorderFactory.createLineBorder(Color.black)); // Create the border
+        panel.add(passLabel, gbc);
         gbc.gridx = 1;
         JPasswordField pass = new JPasswordField(15);
         panel.add(pass, gbc);
@@ -386,7 +403,12 @@ public class StorageGUI extends JPanel {
     private JPasswordField addCardField(JPanel panel, GridBagConstraints gbc) {
         gbc.gridy++;
         gbc.gridx = 0;
-        panel.add(new JLabel("Enter 16 Digit Credit Card Number:"), gbc);
+        JLabel cardLabel = new JLabel("Enter 16 Digit Credit Card Number:");
+        cardLabel.setOpaque(true); // Allow for background of border to be colored
+        cardLabel.setBackground(Color.BLACK); // Set background border color
+        cardLabel.setForeground(Color.WHITE); // Set text color
+        cardLabel.setBorder(BorderFactory.createLineBorder(Color.black)); // Create the border
+        panel.add(cardLabel, gbc);
         gbc.gridx = 1;
         JPasswordField card = new JPasswordField();
         card.setDocument(new PlainDocument() {
@@ -418,7 +440,13 @@ public class StorageGUI extends JPanel {
 
         gbc.gridy++;
         gbc.gridx = 0;
-        panel.add(new JLabel("Start Date:"), gbc);
+
+        JLabel dateLabel = new JLabel("Start Date:");
+        dateLabel.setOpaque(true); // Allow for background of border to be colored
+        dateLabel.setBackground(Color.BLACK); // Set background border color
+        dateLabel.setForeground(Color.WHITE); // Set text color
+        dateLabel.setBorder(BorderFactory.createLineBorder(Color.black)); // Create the border
+        panel.add(dateLabel, gbc);
         gbc.gridx = 1;
         panel.add(startPicker, gbc);
 

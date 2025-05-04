@@ -47,6 +47,8 @@ public class ManageStorageGUI extends JPanel {
     private JTextField sizeTxtField;
     private JTextField priceTxtField;
     private JTextField locationTxtField;
+    private static String[] sizes = {"Small", "Medium", "Large"};
+    private JComboBox sizeList;
 
     /**
      * Constructor for the ManageStorageGUI page, otherwise known as
@@ -59,6 +61,7 @@ public class ManageStorageGUI extends JPanel {
         this.myGui = myGui;
         this.storageIDs = (ArrayList<Integer>) MySQL.getStorageID();
         this.listModel = new DefaultListModel<>();
+        final Integer[] currStorage = new Integer[1]; // Save selected storage unit
         setLayout(new GridBagLayout());
 
         // Create a panel with GridBagLayout and scroller
@@ -100,11 +103,12 @@ public class ManageStorageGUI extends JPanel {
         gbc.anchor = GridBagConstraints.EAST; // Keep this to the left
         panel.add(sizeTxt, gbc);
 
-        // Set size text field
-        sizeTxtField = new JTextField(15);
+        // Set size text combo box
+        sizeList = new JComboBox(sizes);
+        //sizeTxtField = new JTextField(15);
         gbc.gridy = 1;
         gbc.gridx = 1;
-        panel.add(sizeTxtField, gbc);
+        panel.add(sizeList, gbc);
 
         // Confirm size is valid
         sizeValid = new JLabel("");
@@ -233,7 +237,7 @@ public class ManageStorageGUI extends JPanel {
 
         gbc.gridy = 9;
         gbc.gridx = 0;
-        gbc.anchor = GridBagConstraints.NORTHWEST;
+        gbc.anchor = GridBagConstraints.NORTHEAST;
         gbc.fill = GridBagConstraints.NONE;
         gbc.insets = new Insets(0, 15, 0, 0);
         panel.add(labelWrapper, gbc);
@@ -260,6 +264,7 @@ public class ManageStorageGUI extends JPanel {
                     if (selected != null) {
                         ArrayList<Object> unitDetails = new ArrayList<>(MySQL.getStorageInformation(selected));
                         refreshList(unitDetails);
+                        currStorage[0] = list.getSelectedValue();
                     }
                 }
             }
@@ -267,11 +272,32 @@ public class ManageStorageGUI extends JPanel {
 
 
         ///////// Buttons ////////
+        // Delete storage unit button
+        JButton deleteButton = new JButton("Delete Unit");
+        deleteButton.setPreferredSize(new Dimension(120, 30));
+        gbc.gridy = 10;
+        gbc.gridx = 1;
+        gbc.insets = new Insets(20, 0, 10, 0); // Add spacing in between buttons
+        panel.add(deleteButton, gbc);
+
+        // Delete button functionality
+        deleteButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Dialog box
+                JOptionPane.showMessageDialog(null, "Storage Unit Deleted", "", JOptionPane.INFORMATION_MESSAGE);
+
+                // Delete the unit
+                MySQL.deleteStorageUnit(currStorage[0]);
+
+                myGui.showMain("Admin Screen");
+            }
+        });
 
         // Back button
         JButton rBack = new JButton("Back");
         rBack.setPreferredSize(new Dimension(120, 30));
-        gbc.gridy = 10;
+        gbc.gridy = 11;
         gbc.gridx = 0;
         gbc.insets = new Insets(20, 0, 10, 0); // Add spacing in between buttons
         panel.add(rBack, gbc);
@@ -282,7 +308,7 @@ public class ManageStorageGUI extends JPanel {
         // Create Button
         JButton cButton = new JButton("Create Unit");
         cButton.setPreferredSize(new Dimension(120, 30));
-        gbc.gridy = 10;
+        gbc.gridy = 11;
         gbc.gridx = 1;
         gbc.insets = new Insets(20, 80, 10, 0); // Add spacing in between buttons
         panel.add(cButton, gbc);
@@ -291,7 +317,7 @@ public class ManageStorageGUI extends JPanel {
         cButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String size = sizeTxtField.getText();
+                String size = sizes[sizeList.getSelectedIndex()];
                 String location = locationTxtField.getText();
                 String price = priceTxtField.getText();
 
@@ -320,7 +346,6 @@ public class ManageStorageGUI extends JPanel {
             MySQL.createNewStorageUnit(size, priceInt, location);
 
             // Clear textfields
-            sizeTxtField.setText("");
             priceTxtField.setText("");
             locationTxtField.setText("");
 

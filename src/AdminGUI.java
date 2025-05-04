@@ -1,5 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -30,7 +32,7 @@ public class AdminGUI extends JPanel {
         this.myGui = myGui; // Save reference
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints(); // Allows for ordered positioning
-        String monthlyRevenue = "Total Monthly Revenue: $" + Integer.toString(getMonthlyRevenue());
+        String monthlyRevenue = "Total Monthly Revenue: $" + getMonthlyRevenue();
 
         // Create a panel with GridBagLayout
         JPanel panel = new JPanel(new GridBagLayout());
@@ -55,7 +57,7 @@ public class AdminGUI extends JPanel {
         panel.add(userButton, gbc);
 
         // Storage Button
-        JButton storageButton = new JButton("Create Storage Units");
+        JButton storageButton = new JButton("Manage Storage Units");
         storageButton.setPreferredSize(new Dimension(100, 50));
         gbc.gridy = 2;
         gbc.gridx = 0;
@@ -89,6 +91,14 @@ public class AdminGUI extends JPanel {
         gbc.gridwidth = 1; // Ensure label spans both columns
         gbc.anchor = GridBagConstraints.CENTER;
         panel.add(revenueLabel, gbc);
+
+        // Refreshes monthly revenue after entering the page
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentShown(ComponentEvent e) {
+                revenueLabel.setText("Total Monthly Revenue: $" + getMonthlyRevenue());
+            }
+        });
 
         // Add panel to AdminGUI
         add(panel);
